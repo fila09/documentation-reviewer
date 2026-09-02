@@ -1,0 +1,68 @@
+{
+  "name": "@diplodoc/documentation-template",
+  "version": "0.0.0",
+  "description": "template for your diplodoc documentation with hot reload development server",
+  "homepage": "https://github.com/diplodoc-platform/documentation-template",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:diplodoc-platform/documentation-template.git"
+  },
+  "bugs": {
+    "url": "https://github.com/diplodoc-platform/documentation-template/issues",
+    "email": "morozov.kirill.moki@gmail.com"
+  },
+  "author": {
+    "name": "moki",
+    "email": "morozov.kirill.moki@gmail.com",
+    "url": "github.com/moki"
+  },
+  "keywords": [
+    "diplodoc",
+    "markdown-it",
+    "markdown",
+    "playground",
+    "sandbox",
+    "documentation",
+    "development",
+    "hot-reload",
+    "codespaces",
+    "template"
+  ],
+  "license": "MIT",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "start": "npm run build:docs && node scripts/serve.js",
+    "build:docs": "yfm --input docs --output docs-html",
+    "reviewer:dev": "electron-vite dev",
+    "reviewer:build": "electron-vite build",
+    "reviewer:test": "vitest run",
+    "reviewer:test:watch": "vitest"
+  },
+  "dependencies": {
+    "@diplodoc/cli": "^5.39.2",
+    "chokidar": "^3.5.3",
+    "express": "^4.18.2",
+    "glob": "^10.3.4",
+    "lodash": "^4.17.21",
+    "open": "^8.4.2",
+    "parse5": "^7.1.2",
+    "parse5-utils": "^2.0.0",
+    "serve-static": "^1.15.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "electron": "^43.4.0",
+    "electron-vite": "^5.0.0",
+    "vite": "^7.0.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11",
+    "@vitejs/plugin-react": "^5.0.4",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/jest-dom": "^6.8.0",
+    "jsdom": "^27.0.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0"
+  }
+}

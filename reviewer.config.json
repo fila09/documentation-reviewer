@@ -1,0 +1,13 @@
+{
+  "docsRoot": "docs/ru",
+  "undesirablePhrases": [
+    {
+      "phrase": "осуществить настройку",
+      "replacement": "настроить"
+    },
+    {
+      "phrase": "произвести настройку",
+      "replacement": "настроить"
+    }
+  ]
+}

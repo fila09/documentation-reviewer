@@ -1,0 +1,13 @@
+title: База знаний
+href: index.yaml
+items: 
+  - name: Структура технической статьи
+    href: about.md
+  - name: Дополнительная страница
+    href: page.md
+  - name: Другая страница
+    href: anotherpage.md
+  - name: Подраздел
+    include:
+      path: sub-section/toc.yaml
+      mode: link
