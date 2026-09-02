@@ -1,13 +1,11 @@
 import {describe, expect, it} from 'vitest';
-import {resolve} from 'node:path';
-import {loadConfig} from '../../src/engine/config';
+import {join, resolve} from 'node:path';
 import {scanMarkdownFiles} from '../../src/engine/scanner';
 
 describe('scanMarkdownFiles', () => {
-  it('scans only docs/ru and ignores docs/en', async () => {
+  it('scans only the documentation directory passed by the reviewer', async () => {
     const projectRoot = resolve('tests/fixtures/clean-project');
-    const config = await loadConfig(projectRoot);
-    const result = await scanMarkdownFiles(projectRoot, config);
+    const result = await scanMarkdownFiles(join(projectRoot, 'docs/ru'));
 
     expect(result.files.map((file) => file.relativePath)).toEqual(['index.md']);
     expect(result.diagnostics).toEqual([]);

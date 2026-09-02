@@ -1,52 +1,41 @@
-# Documentation Reviewer v0.1
+# Documentation Reviewer v0.1.1
 
-## Что делает версия v0.1
+## Главное правило безопасности
 
-Приложение анализирует только каталог `docs/ru` и ничего не изменяет в исходной документации.
+Проверяемый проект используется только как источник данных. Documentation Reviewer не создает, не изменяет, не переименовывает и не удаляет файлы или каталоги внутри выбранного проекта.
 
-Проверки:
+Настройки и правила находятся в самом приложении. Добавлять `reviewer.config.json` или другие служебные файлы в рабочий репозиторий не требуется.
 
-- битая локальная ссылка на Markdown-файл;
-- ссылка на несуществующий явный якорь;
-- дублирующийся явный якорь `{#anchor}`;
-- пустая ссылка;
-- нежелательная формулировка из `reviewer.config.json`.
+## Установка
 
-Изображения, AI/LLM, GitLab и автоисправления в v0.1 не используются.
-
-## Первый запуск
-
-Требуется Node.js и npm.
-
-```bash
+```powershell
 npm install
+```
+
+Если пакет Electron установился без бинарника:
+
+```powershell
+node .\node_modules\electron\install.js
+```
+
+## Запуск
+
+```powershell
 npm run reviewer:dev
 ```
 
-После установки зависимостей `npm install` также обновит `package-lock.json`, потому что новые зависимости ревьюера были добавлены в `package.json`.
+В v0.1.1 команда сначала собирает актуальную локальную версию приложения, затем запускает Electron. Горячая перезагрузка временно отключена, потому что dev-server `electron-vite` нестабилен в текущей связке версий на Windows.
 
-## Проверки
+## Тесты
 
-```bash
+```powershell
 npm run reviewer:test
-npm run reviewer:build
-npm run build:docs
 ```
 
-Контрольный fixture находится в `tests/fixtures/five-findings-project` и должен возвращать ровно пять замечаний.
+Тест `readOnlyExternalProject.test.ts` сравнивает структуру и SHA-256 файлов внешнего проекта до и после полного ревью. Тест `readOnlySourceGuard.test.ts` запрещает файловые операции записи в Review Engine.
 
-## Настройка
+## Production-сборка
 
-Корневой каталог документации задается в `reviewer.config.json`:
-
-```json
-{
-  "docsRoot": "docs/ru",
-  "undesirablePhrases": [
-    {
-      "phrase": "осуществить настройку",
-      "replacement": "настроить"
-    }
-  ]
-}
+```powershell
+npm run reviewer:build
 ```

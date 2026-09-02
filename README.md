@@ -1,40 +1,38 @@
-# Documentation Template created by Diplodoc
+# Documentation Reviewer
 
-Features:
+Локальное desktop-приложение для проверки Markdown/Diplodoc-документации.
 
-- initial project structure
-- dev server with hot reload
-- codespaces support
-- vscode tutorial via code tours
+## Безопасность
 
-## Initial project structure
+Проверяемый проект используется строго в режиме **read-only**. Reviewer не создает, не изменяет, не переименовывает и не удаляет файлы или каталоги внутри выбранного проекта. Все правила и настройки хранятся внутри самого Reviewer.
 
-Initiatl project structure with basic content can be found within your public github repo "diplodoc-example/docs" 
+## Проверки v0.1.1
 
-## Usage
+- битая локальная ссылка;
+- несуществующий якорь;
+- дублирующийся явный якорь;
+- пустая ссылка;
+- нежелательная формулировка.
 
-### Run locally by cloning repo:
+Сейчас после выбора корня внешнего проекта анализируется `docs/ru`. Выбор произвольной папки документации будет добавлен следующей итерацией.
 
+## Запуск
+
+```powershell
+npm install
+npm run reviewer:dev
 ```
-> git clone git@github.com:diplodoc-platform/documentation-template.git
 
-> cd documentation-template
+## Тесты
 
-> npm start
-
-> listening on 0.0.0.0:8000
-
+```powershell
+npm run reviewer:test
 ```
-now you have development server with hot reload runing and serving built documentation on `0.0.0.0:8000`
 
-### github codespaces
+## Production-сборка
 
-press Use this template -> Open in a codespace
+```powershell
+npm run reviewer:build
+```
 
-![open in a codespace](images/open-in-a-codespace.jpeg)
-
-wait for the development server startup
-
-enjoy developing documentation with html result preview in split view
-
-![codespaces project](images/codespaces-project.jpeg)
+Подробности: `REVIEWER_SETUP.md`.

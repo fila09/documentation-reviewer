@@ -45,7 +45,7 @@ export const brokenLocalLinkRule: ReviewRule = {
           file: document.file.relativePath,
           line: link.line,
           title: 'Битая локальная ссылка',
-          message: `Файл ${resolved} не найден в docs/ru.`,
+          message: `Файл ${resolved} не найден в выбранной папке документации.`,
           source: link.source,
           recommendation: 'Проверьте путь к целевой Markdown-странице.',
           target: link.target,

@@ -1,6 +1,6 @@
 import {readdir, readFile, stat} from 'node:fs/promises';
 import {join, relative} from 'node:path';
-import type {ProjectFile, ReviewerConfig} from './types';
+import type {ProjectFile} from './types';
 
 export interface ScanDiagnostic {
   file: string;
@@ -29,17 +29,12 @@ async function walk(directory: string): Promise<string[]> {
   return result;
 }
 
-export async function scanMarkdownFiles(
-  projectRoot: string,
-  config: ReviewerConfig,
-): Promise<ScanResult> {
-  const docsRoot = join(projectRoot, config.docsRoot);
-
+export async function scanMarkdownFiles(docsRoot: string): Promise<ScanResult> {
   try {
     const rootStat = await stat(docsRoot);
     if (!rootStat.isDirectory()) throw new Error('not a directory');
   } catch {
-    throw new Error(`Область документации ${config.docsRoot} не найдена.`);
+    throw new Error(`Папка документации не найдена: ${docsRoot}`);
   }
 
   const paths = await walk(docsRoot);
