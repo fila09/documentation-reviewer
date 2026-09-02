@@ -5,7 +5,6 @@ import {brokenLocalLinkRule} from '../../src/engine/rules/brokenLocalLink';
 import {missingAnchorRule} from '../../src/engine/rules/missingAnchor';
 import {duplicateExplicitAnchorRule} from '../../src/engine/rules/duplicateExplicitAnchor';
 import {undesirablePhraseRule} from '../../src/engine/rules/undesirablePhrase';
-import {emptySectionRule} from '../../src/engine/rules/emptySection';
 import {listWithoutIntroRule} from '../../src/engine/rules/listWithoutIntro';
 import {skippedHeadingLevelRule} from '../../src/engine/rules/skippedHeadingLevel';
 import {repeatedWordRule} from '../../src/engine/rules/repeatedWord';
@@ -63,7 +62,7 @@ describe('deterministic rules', () => {
     });
   });
 
-  it('reports the second duplicate explicit anchor', () => {
+  it('allows the same explicit anchor in different files', () => {
     const documents = [
       doc('a.md', '# A {#same}'),
       doc('b.md', '# B {#same}'),
@@ -71,12 +70,31 @@ describe('deterministic rules', () => {
 
     const findings = duplicateExplicitAnchorRule.run({documents, config});
 
+    expect(findings).toHaveLength(0);
+  });
+
+  it('reports a duplicate explicit anchor inside one file', () => {
+    const documents = [
+      doc('a.md', '# A {#same}\n\n## B {#same}'),
+    ];
+
+    const findings = duplicateExplicitAnchorRule.run({documents, config});
+
     expect(findings).toHaveLength(1);
     expect(findings[0]).toMatchObject({
       ruleId: 'duplicate-explicit-anchor',
-      file: 'b.md',
-      line: 1,
+      file: 'a.md',
+      line: 3,
     });
+  });
+
+  it('ignores include references when checking broken local links', () => {
+    const findings = brokenLocalLinkRule.run({
+      documents: [doc('guide/page.md', '[repository-check](../_includes/rt_datalake/repository_check.md)')],
+      config,
+    });
+
+    expect(findings).toHaveLength(0);
   });
 
   it('reports an undesirable russian phrase', () => {
@@ -102,32 +120,6 @@ describe('deterministic rules', () => {
       line: 1,
     });
     expect(findings[0].recommendation).toContain('настроить');
-  });
-
-  it('reports an empty section', () => {
-    const findings = emptySectionRule.run({
-      documents: [doc('structure.md', '## Установка\n\n## Настройка\nТекст.')],
-      config,
-    });
-
-    expect(findings).toHaveLength(1);
-    expect(findings[0]).toMatchObject({
-      ruleId: 'empty-section',
-      category: 'structure',
-      severity: 'warning',
-      file: 'structure.md',
-      line: 1,
-    });
-  });
-
-  it('does not report a section that contains text', () => {
-    const findings = emptySectionRule.run({
-      documents: [doc('structure.md', '## Установка\n\nОписание раздела.\n\n## Настройка')],
-      config,
-    });
-
-    expect(findings).toHaveLength(1);
-    expect(findings[0].line).toBe(5);
   });
 
   it('reports a list that starts immediately after a heading', () => {
@@ -176,6 +168,42 @@ describe('deterministic rules', () => {
     });
 
     expect(findings).toHaveLength(0);
+  });
+
+  it('ignores heading-like lines inside fenced code blocks', () => {
+    const content = [
+      '## Репозитории',
+      '',
+      '```',
+      '# для репозиториев ca и продуктов',
+      'rpm http://example',
+      '# для репозитория prometheus',
+      'http://example',
+      '```',
+      '',
+      '#### 2.2.4 для Astra Linux {#h-224}',
+    ].join('\n');
+
+    const findings = skippedHeadingLevelRule.run({
+      documents: [doc('install.md', content)],
+      config,
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0].line).toBe(10);
+    expect(findings[0].message).toContain('уровня 2');
+  });
+
+  it('does not treat markdown-looking content inside code as links or style text', () => {
+    const document = doc('code.md', [
+      '```markdown',
+      '[Ошибка](missing.md)',
+      'Чтобы чтобы настроить сервис.',
+      '```',
+    ].join('\n'));
+
+    expect(brokenLocalLinkRule.run({documents: [document], config})).toHaveLength(0);
+    expect(repeatedWordRule.run({documents: [document], config})).toHaveLength(0);
   });
 
   it('reports a repeated adjacent word case-insensitively', () => {

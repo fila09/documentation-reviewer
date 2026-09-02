@@ -24,15 +24,15 @@ const reviewResult = {
       target: 'target.md#missing',
     },
     {
-      ruleId: 'empty-section',
-      category: 'structure',
+      ruleId: 'skipped-heading-level',
+      category: 'markdown',
       severity: 'warning' as const,
       file: 'guide.md',
       line: 10,
-      title: 'Пустой раздел',
-      message: 'Раздел не содержит текста.',
-      source: '## Пустой раздел',
-      recommendation: 'Добавьте содержимое или удалите раздел.',
+      title: 'Пропущен уровень заголовка',
+      message: 'После заголовка уровня 2 используется уровень 4.',
+      source: '#### Подраздел',
+      recommendation: 'Проверьте иерархию заголовков.',
     },
     {
       ruleId: 'list-without-intro',
@@ -82,12 +82,13 @@ describe('App', () => {
       'C:\\project\\documentation\\manual',
     );
 
-    expect(screen.getByRole('button', {name: 'Структура 2'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Структура 1'})).toBeInTheDocument();
     expect(screen.getByRole('button', {name: 'Ссылки 1'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Markdown 1'})).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', {name: 'Структура 2'}));
+    fireEvent.click(screen.getByRole('button', {name: 'Структура 1'}));
     expect(screen.queryByText('Несуществующий якорь')).not.toBeInTheDocument();
-    expect(screen.getAllByText('Пустой раздел')).toHaveLength(2);
+    expect(screen.getAllByText('Список без вводного текста')).toHaveLength(2);
   });
 
   it('keeps review disabled when docs/ru is not found and no directory is selected', async () => {

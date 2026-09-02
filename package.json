@@ -1,6 +1,6 @@
 {
   "name": "documentation-reviewer",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "description": "Local read-only Markdown documentation reviewer",
   "main": "./out/main/index.js",

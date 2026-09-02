@@ -4,18 +4,15 @@ import type {ReviewRule} from './index';
 export const duplicateExplicitAnchorRule: ReviewRule = {
   id: 'duplicate-explicit-anchor',
   run({documents}) {
-    const firstById = new Map<string, {file: string; line: number}>();
-    const findings: Finding[] = [];
+    return documents.flatMap((document) => {
+      const firstLineById = new Map<string, number>();
+      const findings: Finding[] = [];
 
-    for (const document of documents) {
       for (const anchor of document.anchors) {
-        const first = firstById.get(anchor.id);
+        const firstLine = firstLineById.get(anchor.id);
 
-        if (!first) {
-          firstById.set(anchor.id, {
-            file: document.file.relativePath,
-            line: anchor.line,
-          });
+        if (firstLine === undefined) {
+          firstLineById.set(anchor.id, anchor.line);
           continue;
         }
 
@@ -26,14 +23,14 @@ export const duplicateExplicitAnchorRule: ReviewRule = {
           file: document.file.relativePath,
           line: anchor.line,
           title: 'Дублирующийся явный якорь',
-          message: `Якорь #${anchor.id} уже объявлен в ${first.file}:${first.line}.`,
+          message: `Якорь #${anchor.id} уже объявлен в этом файле на строке ${firstLine}.`,
           source: anchor.source,
-          recommendation: 'Задайте этому разделу уникальный явный якорь.',
+          recommendation: 'Задайте этому разделу уникальный явный якорь в пределах файла.',
           target: `#${anchor.id}`,
         });
       }
-    }
 
-    return findings;
+      return findings;
+    });
   },
 };
