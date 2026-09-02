@@ -1,8 +1,9 @@
 export type Severity = 'error' | 'warning' | 'info';
+export type FindingCategory = 'structure' | 'style' | 'terminology' | 'markdown' | 'links';
 
 export interface Finding {
   ruleId: string;
-  category: string;
+  category: FindingCategory;
   severity: Severity;
   file: string;
   line: number;

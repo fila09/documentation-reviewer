@@ -5,6 +5,10 @@ import {duplicateExplicitAnchorRule} from './duplicateExplicitAnchor';
 import {emptyLinkRule} from './emptyLink';
 import {missingAnchorRule} from './missingAnchor';
 import {undesirablePhraseRule} from './undesirablePhrase';
+import {emptySectionRule} from './emptySection';
+import {listWithoutIntroRule} from './listWithoutIntro';
+import {skippedHeadingLevelRule} from './skippedHeadingLevel';
+import {repeatedWordRule} from './repeatedWord';
 
 export interface RuleContext {
   documents: ParsedDocument[];
@@ -22,4 +26,8 @@ export const rules: ReviewRule[] = [
   duplicateExplicitAnchorRule,
   emptyLinkRule,
   undesirablePhraseRule,
+  emptySectionRule,
+  listWithoutIntroRule,
+  skippedHeadingLevelRule,
+  repeatedWordRule,
 ];

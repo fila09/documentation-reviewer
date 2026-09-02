@@ -5,6 +5,10 @@ import {brokenLocalLinkRule} from '../../src/engine/rules/brokenLocalLink';
 import {missingAnchorRule} from '../../src/engine/rules/missingAnchor';
 import {duplicateExplicitAnchorRule} from '../../src/engine/rules/duplicateExplicitAnchor';
 import {undesirablePhraseRule} from '../../src/engine/rules/undesirablePhrase';
+import {emptySectionRule} from '../../src/engine/rules/emptySection';
+import {listWithoutIntroRule} from '../../src/engine/rules/listWithoutIntro';
+import {skippedHeadingLevelRule} from '../../src/engine/rules/skippedHeadingLevel';
+import {repeatedWordRule} from '../../src/engine/rules/repeatedWord';
 
 const config = {undesirablePhrases: []};
 
@@ -99,4 +103,95 @@ describe('deterministic rules', () => {
     });
     expect(findings[0].recommendation).toContain('настроить');
   });
+
+  it('reports an empty section', () => {
+    const findings = emptySectionRule.run({
+      documents: [doc('structure.md', '## Установка\n\n## Настройка\nТекст.')],
+      config,
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      ruleId: 'empty-section',
+      category: 'structure',
+      severity: 'warning',
+      file: 'structure.md',
+      line: 1,
+    });
+  });
+
+  it('does not report a section that contains text', () => {
+    const findings = emptySectionRule.run({
+      documents: [doc('structure.md', '## Установка\n\nОписание раздела.\n\n## Настройка')],
+      config,
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0].line).toBe(5);
+  });
+
+  it('reports a list that starts immediately after a heading', () => {
+    const findings = listWithoutIntroRule.run({
+      documents: [doc('instruction.md', '## Установка\n\n1. Скачайте архив.\n2. Распакуйте архив.')],
+      config,
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      ruleId: 'list-without-intro',
+      category: 'structure',
+      severity: 'info',
+      line: 3,
+    });
+  });
+
+  it('does not report a list when there is introductory text', () => {
+    const findings = listWithoutIntroRule.run({
+      documents: [doc('instruction.md', '## Установка\n\nЧтобы установить компонент:\n\n1. Скачайте архив.')],
+      config,
+    });
+
+    expect(findings).toHaveLength(0);
+  });
+
+  it('reports a skipped heading level', () => {
+    const findings = skippedHeadingLevelRule.run({
+      documents: [doc('headings.md', '# Документ\n\n### Подраздел')],
+      config,
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      ruleId: 'skipped-heading-level',
+      category: 'markdown',
+      severity: 'warning',
+      line: 3,
+    });
+  });
+
+  it('does not report sequential heading levels', () => {
+    const findings = skippedHeadingLevelRule.run({
+      documents: [doc('headings.md', '# Документ\n\n## Раздел\n\n### Подраздел')],
+      config,
+    });
+
+    expect(findings).toHaveLength(0);
+  });
+
+  it('reports a repeated adjacent word case-insensitively', () => {
+    const findings = repeatedWordRule.run({
+      documents: [doc('style.md', 'Чтобы чтобы настроить сервис, откройте параметры.')],
+      config,
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      ruleId: 'repeated-word',
+      category: 'style',
+      severity: 'error',
+      line: 1,
+    });
+    expect(findings[0].message).toContain('Чтобы');
+  });
+
 });

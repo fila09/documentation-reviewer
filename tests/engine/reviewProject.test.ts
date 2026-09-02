@@ -31,6 +31,21 @@ describe('reviewProject', () => {
     expect(result.docsRoot).toBe(docsRoot);
   });
 
+  it('returns the five editorial findings introduced in v0.3', async () => {
+    const projectRoot = resolve('tests/fixtures/editorial-rules-project');
+    const docsRoot = resolve(projectRoot, 'docs/ru');
+    const result = await reviewProject(projectRoot, docsRoot);
+
+    expect(result.findings.map((finding) => finding.ruleId).sort()).toEqual([
+      'empty-section',
+      'list-without-intro',
+      'repeated-word',
+      'skipped-heading-level',
+      'undesirable-phrase',
+    ]);
+    expect(result.diagnostics).toEqual([]);
+  });
+
   it('rejects a documentation directory outside the selected project', async () => {
     const projectRoot = resolve('tests/fixtures/custom-docs-project');
     const outsideDocsRoot = resolve('tests/fixtures/five-findings-project/docs/ru');

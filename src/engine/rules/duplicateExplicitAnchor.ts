@@ -21,7 +21,7 @@ export const duplicateExplicitAnchorRule: ReviewRule = {
 
         findings.push({
           ruleId: 'duplicate-explicit-anchor',
-          category: 'anchors',
+          category: 'markdown',
           severity: 'error',
           file: document.file.relativePath,
           line: anchor.line,

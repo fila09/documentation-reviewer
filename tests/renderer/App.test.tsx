@@ -23,6 +23,28 @@ const reviewResult = {
       recommendation: 'Проверьте идентификатор якоря.',
       target: 'target.md#missing',
     },
+    {
+      ruleId: 'empty-section',
+      category: 'structure',
+      severity: 'warning' as const,
+      file: 'guide.md',
+      line: 10,
+      title: 'Пустой раздел',
+      message: 'Раздел не содержит текста.',
+      source: '## Пустой раздел',
+      recommendation: 'Добавьте содержимое или удалите раздел.',
+    },
+    {
+      ruleId: 'list-without-intro',
+      category: 'structure',
+      severity: 'info' as const,
+      file: 'guide.md',
+      line: 20,
+      title: 'Список без вводного текста',
+      message: 'Список начинается сразу после заголовка.',
+      source: '1. Выполните действие.',
+      recommendation: 'Добавьте вводную фразу перед списком.',
+    },
   ],
 };
 
@@ -59,6 +81,13 @@ describe('App', () => {
       'C:\\project',
       'C:\\project\\documentation\\manual',
     );
+
+    expect(screen.getByRole('button', {name: 'Структура 2'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Ссылки 1'})).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', {name: 'Структура 2'}));
+    expect(screen.queryByText('Несуществующий якорь')).not.toBeInTheDocument();
+    expect(screen.getAllByText('Пустой раздел')).toHaveLength(2);
   });
 
   it('keeps review disabled when docs/ru is not found and no directory is selected', async () => {

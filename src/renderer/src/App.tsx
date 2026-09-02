@@ -1,9 +1,9 @@
-import {useMemo, useState} from 'react';
-import type {Finding, Severity} from '../../engine/types';
+import {useEffect, useMemo, useState} from 'react';
+import type {Finding, FindingCategory, Severity} from '../../engine/types';
 import type {ReviewResult} from '../../engine/reviewProject';
 import {FindingDetails} from './components/FindingDetails';
 import {FindingsList} from './components/FindingsList';
-import {Filters, type SeverityFilter} from './components/Filters';
+import {Filters, type CategoryFilter, type SeverityFilter} from './components/Filters';
 import {ProjectHeader} from './components/ProjectHeader';
 import './styles.css';
 
@@ -12,18 +12,20 @@ export function App() {
   const [docsRoot, setDocsRoot] = useState<string | null>(null);
   const [result, setResult] = useState<ReviewResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState<SeverityFilter>('all');
+  const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all');
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [selected, setSelected] = useState<Finding | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const visibleFindings = useMemo(
     () => result?.findings.filter((finding) =>
-      filter === 'all' || finding.severity === filter,
+      (severityFilter === 'all' || finding.severity === severityFilter)
+      && (categoryFilter === 'all' || finding.category === categoryFilter),
     ) ?? [],
-    [result, filter],
+    [result, severityFilter, categoryFilter],
   );
 
-  const counts = useMemo(() => {
+  const severityCounts = useMemo(() => {
     const findings = result?.findings ?? [];
     const count = (severity: Severity) =>
       findings.filter((finding) => finding.severity === severity).length;
@@ -36,10 +38,30 @@ export function App() {
     };
   }, [result]);
 
+  const categoryCounts = useMemo(() => {
+    const findings = result?.findings ?? [];
+    const count = (category: FindingCategory) =>
+      findings.filter((finding) => finding.category === category).length;
+
+    return {
+      structure: count('structure'),
+      style: count('style'),
+      terminology: count('terminology'),
+      markdown: count('markdown'),
+      links: count('links'),
+    };
+  }, [result]);
+
+  useEffect(() => {
+    if (selected && visibleFindings.includes(selected)) return;
+    setSelected(visibleFindings[0] ?? null);
+  }, [visibleFindings, selected]);
+
   function clearReviewState() {
     setResult(null);
     setSelected(null);
-    setFilter('all');
+    setSeverityFilter('all');
+    setCategoryFilter('all');
     setError(null);
   }
 
@@ -80,7 +102,8 @@ export function App() {
       const next = await window.reviewer.reviewProject(projectRoot, docsRoot);
       setResult(next);
       setSelected(next.findings[0] ?? null);
-      setFilter('all');
+      setSeverityFilter('all');
+    setCategoryFilter('all');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
@@ -108,7 +131,14 @@ export function App() {
             <span>Замечаний: {result.findings.length}</span>
           </section>
 
-          <Filters value={filter} counts={counts} onChange={setFilter} />
+          <Filters
+            severityValue={severityFilter}
+            categoryValue={categoryFilter}
+            severityCounts={severityCounts}
+            categoryCounts={categoryCounts}
+            onSeverityChange={setSeverityFilter}
+            onCategoryChange={setCategoryFilter}
+          />
 
           <section className="workspace">
             <FindingsList
