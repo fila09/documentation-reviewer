@@ -35,7 +35,8 @@ describe('external project safety', () => {
 
     await expect(stat(configPath)).rejects.toThrow();
 
-    const result = await reviewProject(projectRoot);
+    const docsRoot = join(projectRoot, 'docs/ru');
+    const result = await reviewProject(projectRoot, docsRoot);
 
     expect(result.checkedFiles).toBe(1);
     expect(result.docsRoot.replaceAll('\\', '/')).toContain('/docs/ru');
@@ -45,7 +46,7 @@ describe('external project safety', () => {
     const projectRoot = resolve('tests/fixtures/external-project-no-config');
     const before = await snapshotTree(projectRoot);
 
-    await reviewProject(projectRoot);
+    await reviewProject(projectRoot, join(projectRoot, 'docs/ru'));
 
     const after = await snapshotTree(projectRoot);
     expect(after).toEqual(before);

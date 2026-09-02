@@ -1,6 +1,6 @@
-import {join} from 'node:path';
 import {reviewerConfig} from './config';
 import {parseMarkdown} from './parser';
+import {resolveProjectPaths} from './projectPaths';
 import {sortFindings} from './reporter';
 import {rules} from './rules';
 import {scanMarkdownFiles} from './scanner';
@@ -20,9 +20,10 @@ export interface ReviewResult {
   diagnostics: ReviewDiagnostic[];
 }
 
-export async function reviewProject(projectRoot: string): Promise<ReviewResult> {
-  const docsRoot = join(projectRoot, reviewerConfig.docsRoot);
-  const scanResult = await scanMarkdownFiles(docsRoot);
+export async function reviewProject(projectRoot: string, docsRoot: string): Promise<ReviewResult> {
+  const resolved = await resolveProjectPaths(projectRoot, docsRoot);
+
+  const scanResult = await scanMarkdownFiles(resolved.docsRoot);
   const documents = scanResult.files.map(parseMarkdown);
   const findings: Finding[] = [];
   const diagnostics: ReviewDiagnostic[] = scanResult.diagnostics.map((diagnostic) => ({
@@ -43,8 +44,8 @@ export async function reviewProject(projectRoot: string): Promise<ReviewResult> 
   }
 
   return {
-    projectRoot,
-    docsRoot,
+    projectRoot: resolved.projectRoot,
+    docsRoot: resolved.docsRoot,
     checkedFiles: scanResult.files.length,
     findings: sortFindings(findings),
     diagnostics,

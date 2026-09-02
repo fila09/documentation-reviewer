@@ -9,6 +9,7 @@ import './styles.css';
 
 export function App() {
   const [projectRoot, setProjectRoot] = useState<string | null>(null);
+  const [docsRoot, setDocsRoot] = useState<string | null>(null);
   const [result, setResult] = useState<ReviewResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<SeverityFilter>('all');
@@ -35,29 +36,48 @@ export function App() {
     };
   }, [result]);
 
+  function clearReviewState() {
+    setResult(null);
+    setSelected(null);
+    setFilter('all');
+    setError(null);
+  }
+
   async function selectProject() {
     try {
-      const selectedPath = await window.reviewer.selectProject();
+      const selection = await window.reviewer.selectProject();
+      if (!selection) return;
+
+      setProjectRoot(selection.projectRoot);
+      setDocsRoot(selection.suggestedDocsRoot);
+      clearReviewState();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    }
+  }
+
+  async function selectDocsRoot() {
+    if (!projectRoot) return;
+
+    try {
+      const selectedPath = await window.reviewer.selectDocsRoot(projectRoot);
       if (!selectedPath) return;
 
-      setProjectRoot(selectedPath);
-      setResult(null);
-      setSelected(null);
-      setFilter('all');
-      setError(null);
+      setDocsRoot(selectedPath);
+      clearReviewState();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     }
   }
 
   async function runReview() {
-    if (!projectRoot) return;
+    if (!projectRoot || !docsRoot) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      const next = await window.reviewer.reviewProject(projectRoot);
+      const next = await window.reviewer.reviewProject(projectRoot, docsRoot);
       setResult(next);
       setSelected(next.findings[0] ?? null);
       setFilter('all');
@@ -72,8 +92,10 @@ export function App() {
     <main className="app-shell">
       <ProjectHeader
         projectRoot={projectRoot}
+        docsRoot={docsRoot}
         loading={loading}
-        onSelect={selectProject}
+        onSelectProject={selectProject}
+        onSelectDocsRoot={selectDocsRoot}
         onReview={runReview}
       />
 
