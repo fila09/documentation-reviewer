@@ -43,7 +43,26 @@ button:disabled {
   align-items: center;
 }
 
-.project-header h1 { margin: 0 0 6px; }
+.project-header h1 { margin: 0 0 12px; }
+
+.project-info { min-width: 0; flex: 1; }
+
+.path-row {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.path-label {
+  font-weight: 600;
+  color: #475467;
+}
+
+.inline-action {
+  padding: 5px 10px;
+}
 
 .project-path {
   color: #667085;

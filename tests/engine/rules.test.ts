@@ -6,7 +6,7 @@ import {missingAnchorRule} from '../../src/engine/rules/missingAnchor';
 import {duplicateExplicitAnchorRule} from '../../src/engine/rules/duplicateExplicitAnchor';
 import {undesirablePhraseRule} from '../../src/engine/rules/undesirablePhrase';
 
-const config = {docsRoot: 'docs/ru', undesirablePhrases: []};
+const config = {undesirablePhrases: []};
 
 function doc(relativePath: string, content: string) {
   return parseMarkdown({
@@ -81,7 +81,6 @@ describe('deterministic rules', () => {
         doc('style.md', 'Необходимо осуществить настройку сервиса.'),
       ],
       config: {
-        docsRoot: 'docs/ru',
         undesirablePhrases: [
           {
             phrase: 'осуществить настройку',

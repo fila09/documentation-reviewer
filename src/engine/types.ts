@@ -19,7 +19,6 @@ export interface PhraseRule {
 }
 
 export interface ReviewerConfig {
-  docsRoot: string;
   undesirablePhrases: PhraseRule[];
 }
 
