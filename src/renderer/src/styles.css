@@ -95,7 +95,8 @@ button:disabled {
   grid-template-columns: minmax(320px, 0.9fr) minmax(420px, 1.1fr);
   gap: 16px;
   margin-top: 16px;
-  min-height: 520px;
+  height: calc(100vh - 245px);
+  min-height: 420px;
 }
 
 .findings-list,
@@ -124,6 +125,8 @@ button:disabled {
 
 .finding-details {
   padding: 22px;
+  align-self: start;
+  max-height: 100%;
 }
 
 .finding-details h2 { margin-top: 0; }
@@ -160,7 +163,13 @@ button:disabled {
 }
 
 @media (max-width: 900px) {
-  .workspace { grid-template-columns: 1fr; }
+  .workspace {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .findings-list,
+  .finding-details { max-height: none; }
+
   .project-header { align-items: flex-start; flex-direction: column; }
 }
 

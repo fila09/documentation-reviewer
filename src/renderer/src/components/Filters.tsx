@@ -7,7 +7,7 @@ interface Props {
   severityValue: SeverityFilter;
   categoryValue: CategoryFilter;
   severityCounts: {all: number; error: number; warning: number; info: number};
-  categoryCounts: Record<FindingCategory, number>;
+  categoryCounts: {all: number} & Record<FindingCategory, number>;
   onSeverityChange(value: SeverityFilter): void;
   onCategoryChange(value: CategoryFilter): void;
 }
@@ -40,15 +40,20 @@ export function Filters({
           ['error', `Ошибки ${severityCounts.error}`],
           ['warning', `Предупреждения ${severityCounts.warning}`],
           ['info', `Информация ${severityCounts.info}`],
-        ] as const).map(([key, label]) => (
-          <button
-            key={key}
-            className={`${severityValue === key ? 'active' : ''} severity-filter ${key}`.trim()}
-            onClick={() => onSeverityChange(key)}
-          >
-            {label}
-          </button>
-        ))}
+        ] as const).map(([key, label]) => {
+          const count = severityCounts[key];
+          const disabled = key !== 'all' && count === 0;
+          return (
+            <button
+              key={key}
+              className={`${severityValue === key ? 'active' : ''} severity-filter ${key}`.trim()}
+              disabled={disabled}
+              onClick={() => onSeverityChange(key)}
+            >
+              {label}
+            </button>
+          );
+        })}
       </nav>
 
       <nav className="filters category-filters" aria-label="По категории">
@@ -56,19 +61,23 @@ export function Filters({
           className={categoryValue === 'all' ? 'active' : ''}
           onClick={() => onCategoryChange('all')}
         >
-          Все категории {severityCounts.all}
+          Все категории {categoryCounts.all}
         </button>
-        {(Object.keys(categoryLabels) as FindingCategory[]).map((category) => (
-          <button
-            key={category}
-            className={categoryValue === category ? 'active' : ''}
-            onClick={() => onCategoryChange(
-              categoryValue === category ? 'all' : category,
-            )}
-          >
-            {categoryLabels[category]} {categoryCounts[category]}
-          </button>
-        ))}
+        {(Object.keys(categoryLabels) as FindingCategory[]).map((category) => {
+          const count = categoryCounts[category];
+          return (
+            <button
+              key={category}
+              className={categoryValue === category ? 'active' : ''}
+              disabled={count === 0}
+              onClick={() => onCategoryChange(
+                categoryValue === category ? 'all' : category,
+              )}
+            >
+              {categoryLabels[category]} {count}
+            </button>
+          );
+        })}
       </nav>
     </section>
   );

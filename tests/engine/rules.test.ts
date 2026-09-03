@@ -206,6 +206,24 @@ describe('deterministic rules', () => {
     expect(repeatedWordRule.run({documents: [document], config})).toHaveLength(0);
   });
 
+  it('does not join words across inline code when checking repeated words', () => {
+    const findings = repeatedWordRule.run({
+      documents: [doc('inline.md', 'в `server.properties` в разделе настройте параметр')],
+      config,
+    });
+
+    expect(findings).toHaveLength(0);
+  });
+
+  it('does not report adjacent inline-code spans as a repeated word', () => {
+    const findings = repeatedWordRule.run({
+      documents: [doc('inline.md', 'Хотя команда `cqlsh` `COPY` может загружать данные CSV')],
+      config,
+    });
+
+    expect(findings).toHaveLength(0);
+  });
+
   it('reports a repeated adjacent word case-insensitively', () => {
     const findings = repeatedWordRule.run({
       documents: [doc('style.md', 'Чтобы чтобы настроить сервис, откройте параметры.')],

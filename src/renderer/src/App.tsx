@@ -26,7 +26,9 @@ export function App() {
   );
 
   const severityCounts = useMemo(() => {
-    const findings = result?.findings ?? [];
+    const findings = (result?.findings ?? []).filter((finding) =>
+      categoryFilter === 'all' || finding.category === categoryFilter,
+    );
     const count = (severity: Severity) =>
       findings.filter((finding) => finding.severity === severity).length;
 
@@ -36,21 +38,24 @@ export function App() {
       warning: count('warning'),
       info: count('info'),
     };
-  }, [result]);
+  }, [result, categoryFilter]);
 
   const categoryCounts = useMemo(() => {
-    const findings = result?.findings ?? [];
+    const findings = (result?.findings ?? []).filter((finding) =>
+      severityFilter === 'all' || finding.severity === severityFilter,
+    );
     const count = (category: FindingCategory) =>
       findings.filter((finding) => finding.category === category).length;
 
     return {
+      all: findings.length,
       structure: count('structure'),
       style: count('style'),
       terminology: count('terminology'),
       markdown: count('markdown'),
       links: count('links'),
     };
-  }, [result]);
+  }, [result, severityFilter]);
 
   useEffect(() => {
     if (selected && visibleFindings.includes(selected)) return;

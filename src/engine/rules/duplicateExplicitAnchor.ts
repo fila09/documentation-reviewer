@@ -22,10 +22,10 @@ export const duplicateExplicitAnchorRule: ReviewRule = {
           severity: 'error',
           file: document.file.relativePath,
           line: anchor.line,
-          title: 'Дублирующийся явный якорь',
+          title: 'Дублирующийся якорь',
           message: `Якорь #${anchor.id} уже объявлен в этом файле на строке ${firstLine}.`,
           source: anchor.source,
-          recommendation: 'Задайте этому разделу уникальный явный якорь в пределах файла.',
+          recommendation: 'Задайте этому разделу уникальный якорь в пределах файла.',
           target: `#${anchor.id}`,
         });
       }

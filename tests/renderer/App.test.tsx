@@ -103,4 +103,33 @@ describe('App', () => {
     expect(await screen.findByText('Папка документации не выбрана')).toBeInTheDocument();
     expect(screen.getByRole('button', {name: 'Проверить проект'})).toBeDisabled();
   });
+  it('recalculates category counts for the selected severity and disables empty combinations', async () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', {name: 'Выбрать проект'}));
+    await screen.findByText('C:\\project');
+    fireEvent.click(screen.getByRole('button', {name: 'Проверить проект'}));
+    await screen.findByText('Проверено: 3');
+
+    fireEvent.click(screen.getByRole('button', {name: 'Ошибки 1'}));
+
+    expect(screen.getByRole('button', {name: 'Все категории 1'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Структура 0'})).toBeDisabled();
+    expect(screen.getByRole('button', {name: 'Markdown 0'})).toBeDisabled();
+    expect(screen.getByRole('button', {name: 'Ссылки 1'})).not.toBeDisabled();
+  });
+
+  it('recalculates severity counts for the selected category', async () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', {name: 'Выбрать проект'}));
+    await screen.findByText('C:\\project');
+    fireEvent.click(screen.getByRole('button', {name: 'Проверить проект'}));
+    await screen.findByText('Проверено: 3');
+
+    fireEvent.click(screen.getByRole('button', {name: 'Структура 1'}));
+
+    expect(screen.getByRole('button', {name: 'Все 1'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Ошибки 0'})).toBeDisabled();
+    expect(screen.getByRole('button', {name: 'Информация 1'})).not.toBeDisabled();
+  });
+
 });
