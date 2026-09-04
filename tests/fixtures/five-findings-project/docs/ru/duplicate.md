@@ -1,1 +1,3 @@
-# Другая страница {#shared-anchor}
+# Другая страница {#duplicate-anchor}
+
+## Подраздел {#duplicate-anchor}

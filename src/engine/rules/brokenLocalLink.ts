@@ -34,6 +34,7 @@ export const brokenLocalLinkRule: ReviewRule = {
 
         const {path} = splitTarget(link.target);
         if (!path || !path.toLowerCase().endsWith('.md')) return [];
+        if (path.split(/[\\/]+/).includes('_includes')) return [];
 
         const resolved = resolveRelativeTarget(document.file.relativePath, path);
         if (byPath.has(resolved)) return [];

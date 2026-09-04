@@ -23,6 +23,28 @@ const reviewResult = {
       recommendation: 'Проверьте идентификатор якоря.',
       target: 'target.md#missing',
     },
+    {
+      ruleId: 'skipped-heading-level',
+      category: 'markdown',
+      severity: 'warning' as const,
+      file: 'guide.md',
+      line: 10,
+      title: 'Пропущен уровень заголовка',
+      message: 'После заголовка уровня 2 используется уровень 4.',
+      source: '#### Подраздел',
+      recommendation: 'Проверьте иерархию заголовков.',
+    },
+    {
+      ruleId: 'list-without-intro',
+      category: 'structure',
+      severity: 'info' as const,
+      file: 'guide.md',
+      line: 20,
+      title: 'Список без вводного текста',
+      message: 'Список начинается сразу после заголовка.',
+      source: '1. Выполните действие.',
+      recommendation: 'Добавьте вводную фразу перед списком.',
+    },
   ],
 };
 
@@ -49,7 +71,7 @@ describe('App', () => {
     expect(await screen.findByText('C:\\project')).toBeInTheDocument();
     expect(screen.getByText('C:\\project\\docs\\ru')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', {name: 'Изменить'}));
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить папку'}));
     expect(await screen.findByText('C:\\project\\documentation\\manual')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', {name: 'Проверить проект'}));
@@ -59,6 +81,14 @@ describe('App', () => {
       'C:\\project',
       'C:\\project\\documentation\\manual',
     );
+
+    expect(screen.getByRole('button', {name: 'Структура 1'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Ссылки 1'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Markdown 1'})).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', {name: 'Структура 1'}));
+    expect(screen.queryByText('Несуществующий якорь')).not.toBeInTheDocument();
+    expect(screen.getAllByText('Список без вводного текста')).toHaveLength(2);
   });
 
   it('keeps review disabled when docs/ru is not found and no directory is selected', async () => {
@@ -73,4 +103,42 @@ describe('App', () => {
     expect(await screen.findByText('Папка документации не выбрана')).toBeInTheDocument();
     expect(screen.getByRole('button', {name: 'Проверить проект'})).toBeDisabled();
   });
+  it('recalculates category counts for the selected severity and disables empty combinations', async () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', {name: 'Выбрать проект'}));
+    await screen.findByText('C:\\project');
+    fireEvent.click(screen.getByRole('button', {name: 'Проверить проект'}));
+    await screen.findByText('Проверено: 3');
+
+    fireEvent.click(screen.getByRole('button', {name: 'Ошибки 1'}));
+
+    expect(screen.getByRole('button', {name: 'Все категории 1'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Структура 0'})).toBeDisabled();
+    expect(screen.getByRole('button', {name: 'Markdown 0'})).toBeDisabled();
+    expect(screen.getByRole('button', {name: 'Ссылки 1'})).not.toBeDisabled();
+  });
+
+  it('recalculates severity counts for the selected category', async () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', {name: 'Выбрать проект'}));
+    await screen.findByText('C:\\project');
+    fireEvent.click(screen.getByRole('button', {name: 'Проверить проект'}));
+    await screen.findByText('Проверено: 3');
+
+    fireEvent.click(screen.getByRole('button', {name: 'Структура 1'}));
+
+    expect(screen.getByRole('button', {name: 'Все 1'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Ошибки 0'})).toBeDisabled();
+    expect(screen.getByRole('button', {name: 'Информация 1'})).not.toBeDisabled();
+  });
+
+  it('uses the russian product name and groups project actions in the header', () => {
+    render(<App />);
+
+    expect(screen.getByRole('heading', {name: 'ДокРевью'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Выбрать проект'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Выбрать папку'})).toBeDisabled();
+    expect(screen.getByRole('button', {name: 'Проверить проект'})).toHaveClass('primary-action');
+  });
+
 });

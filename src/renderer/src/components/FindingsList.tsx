@@ -1,4 +1,5 @@
 import type {Finding} from '../../../engine/types';
+import {categoryLabel} from './Filters';
 
 interface Props {
   findings: Finding[];
@@ -16,12 +17,15 @@ export function FindingsList({findings, selected, onSelect}: Props) {
       {findings.map((finding, index) => (
         <button
           key={`${finding.ruleId}:${finding.file}:${finding.line}:${index}`}
-          className={selected === finding ? 'finding selected' : 'finding'}
+          className={`finding severity-${finding.severity}${selected === finding ? ' selected' : ''}`}
           onClick={() => onSelect(finding)}
         >
-          <span className={`severity ${finding.severity}`}>
-            {finding.severity === 'error' ? 'Ошибка' : finding.severity === 'warning' ? 'Предупреждение' : 'Информация'}
-          </span>
+          <div className="finding-meta">
+            <span className={`severity ${finding.severity}`}>
+              {finding.severity === 'error' ? 'Ошибка' : finding.severity === 'warning' ? 'Предупреждение' : 'Информация'}
+            </span>
+            <span className="category-badge">{categoryLabel(finding.category)}</span>
+          </div>
           <strong>{finding.file} · {finding.line}</strong>
           <span>{finding.title}</span>
         </button>

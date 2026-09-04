@@ -44,4 +44,22 @@ describe('parseMarkdown', () => {
       },
     ]);
   });
+
+  it('ignores markdown syntax inside fenced and inline code', () => {
+    const parsed = parseMarkdown({
+      absolutePath: '/tmp/code.md',
+      relativePath: 'code.md',
+      content: [
+        '`[inline](inline.md) {#inline}`',
+        '```markdown',
+        '[fenced](missing.md) {#fenced}',
+        '```',
+        '[real](real.md) {#real}',
+      ].join('\n'),
+    });
+
+    expect(parsed.links.map((link) => link.target)).toEqual(['real.md']);
+    expect(parsed.anchors.map((anchor) => anchor.id)).toEqual(['real']);
+  });
+
 });

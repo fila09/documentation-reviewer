@@ -1,3 +1,7 @@
+import {mixedAlphabetRule} from './mixedAlphabet';
+import {multipleSpacesRule} from './multipleSpaces';
+import {spaceBeforePunctuationRule} from './spaceBeforePunctuation';
+import {emptyAnchorRule} from './emptyAnchor';
 import type {Finding, ReviewerConfig} from '../types';
 import type {ParsedDocument} from '../parser';
 import {brokenLocalLinkRule} from './brokenLocalLink';
@@ -5,6 +9,9 @@ import {duplicateExplicitAnchorRule} from './duplicateExplicitAnchor';
 import {emptyLinkRule} from './emptyLink';
 import {missingAnchorRule} from './missingAnchor';
 import {undesirablePhraseRule} from './undesirablePhrase';
+import {listWithoutIntroRule} from './listWithoutIntro';
+import {skippedHeadingLevelRule} from './skippedHeadingLevel';
+import {repeatedWordRule} from './repeatedWord';
 
 export interface RuleContext {
   documents: ParsedDocument[];
@@ -17,9 +24,16 @@ export interface ReviewRule {
 }
 
 export const rules: ReviewRule[] = [
+  emptyAnchorRule,
+  spaceBeforePunctuationRule,
+  multipleSpacesRule,
+  mixedAlphabetRule,
   brokenLocalLinkRule,
   missingAnchorRule,
   duplicateExplicitAnchorRule,
   emptyLinkRule,
   undesirablePhraseRule,
+  listWithoutIntroRule,
+  skippedHeadingLevelRule,
+  repeatedWordRule,
 ];
