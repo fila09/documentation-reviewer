@@ -1,6 +1,11 @@
 export type Severity = 'error' | 'warning' | 'info';
 export type FindingCategory = 'structure' | 'style' | 'terminology' | 'markdown' | 'links';
 
+export interface SourceHighlight {
+  start: number;
+  end: number;
+}
+
 export interface Finding {
   ruleId: string;
   category: FindingCategory;
@@ -12,6 +17,7 @@ export interface Finding {
   source: string;
   recommendation: string;
   target?: string;
+  highlights?: SourceHighlight[];
 }
 
 export interface PhraseRule {

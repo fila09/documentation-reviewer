@@ -1,3 +1,7 @@
+import {mixedAlphabetRule} from './mixedAlphabet';
+import {multipleSpacesRule} from './multipleSpaces';
+import {spaceBeforePunctuationRule} from './spaceBeforePunctuation';
+import {emptyAnchorRule} from './emptyAnchor';
 import type {Finding, ReviewerConfig} from '../types';
 import type {ParsedDocument} from '../parser';
 import {brokenLocalLinkRule} from './brokenLocalLink';
@@ -20,6 +24,10 @@ export interface ReviewRule {
 }
 
 export const rules: ReviewRule[] = [
+  emptyAnchorRule,
+  spaceBeforePunctuationRule,
+  multipleSpacesRule,
+  mixedAlphabetRule,
   brokenLocalLinkRule,
   missingAnchorRule,
   duplicateExplicitAnchorRule,

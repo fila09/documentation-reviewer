@@ -4,6 +4,7 @@ import {registerReviewerIpc} from './ipc';
 
 function createWindow(): void {
   const window = new BrowserWindow({
+    title: 'ДокРевью',
     width: 1200,
     height: 760,
     minWidth: 900,

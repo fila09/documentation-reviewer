@@ -1,5 +1,26 @@
-import type {Finding} from '../../../engine/types';
+import type {ReactNode} from 'react';
+import type {Finding, SourceHighlight} from '../../../engine/types';
 import {categoryLabel} from './Filters';
+
+function HighlightedSource({source, highlights}: {source: string; highlights?: SourceHighlight[]}) {
+  if (!highlights?.length) return <>{source}</>;
+
+  const sorted = [...highlights]
+    .filter(({start, end}) => start >= 0 && end > start && end <= source.length)
+    .sort((a, b) => a.start - b.start);
+
+  const nodes: ReactNode[] = [];
+  let cursor = 0;
+
+  sorted.forEach(({start, end}, index) => {
+    if (start > cursor) nodes.push(source.slice(cursor, start));
+    nodes.push(<mark className="source-highlight" key={`${start}-${end}-${index}`}>{source.slice(start, end)}</mark>);
+    cursor = Math.max(cursor, end);
+  });
+
+  if (cursor < source.length) nodes.push(source.slice(cursor));
+  return <>{nodes}</>;
+}
 
 export function FindingDetails({finding}: {finding: Finding | null}) {
   if (!finding) {
@@ -26,7 +47,7 @@ export function FindingDetails({finding}: {finding: Finding | null}) {
       <p>{finding.message}</p>
 
       <h3>Фрагмент</h3>
-      <pre><code>{finding.source}</code></pre>
+      <pre><code><HighlightedSource source={finding.source} highlights={finding.highlights} /></code></pre>
 
       <h3>Рекомендация</h3>
       <p>{finding.recommendation}</p>

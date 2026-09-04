@@ -1,4 +1,4 @@
-# Documentation Reviewer
+# ДокРевью
 
 Локальное desktop-приложение для проверки Markdown/Diplodoc-документации.
 

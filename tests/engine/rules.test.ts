@@ -8,6 +8,15 @@ import {undesirablePhraseRule} from '../../src/engine/rules/undesirablePhrase';
 import {listWithoutIntroRule} from '../../src/engine/rules/listWithoutIntro';
 import {skippedHeadingLevelRule} from '../../src/engine/rules/skippedHeadingLevel';
 import {repeatedWordRule} from '../../src/engine/rules/repeatedWord';
+import {emptyAnchorRule} from '../../src/engine/rules/emptyAnchor';
+
+import {spaceBeforePunctuationRule} from '../../src/engine/rules/spaceBeforePunctuation';
+
+
+import {multipleSpacesRule} from '../../src/engine/rules/multipleSpaces';
+
+import {mixedAlphabetRule} from '../../src/engine/rules/mixedAlphabet';
+
 
 const config = {undesirablePhrases: []};
 
@@ -238,6 +247,149 @@ describe('deterministic rules', () => {
       line: 1,
     });
     expect(findings[0].message).toContain('Чтобы');
+  });
+
+  it('reports an empty explicit anchor', () => {
+    const findings = emptyAnchorRule.run({
+      documents: [doc('anchor.md', '## Раздел {#}')],
+      config,
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      ruleId: 'empty-anchor',
+      category: 'markdown',
+      severity: 'error',
+      file: 'anchor.md',
+      line: 1,
+    });
+  });
+
+  it('reports a space before punctuation', () => {
+    const findings = spaceBeforePunctuationRule.run({
+      documents: [doc('style.md', 'Откройте файл .')],
+      config,
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0].ruleId).toBe('space-before-punctuation');
+  });
+
+  it('does not report a space before punctuation inside inline or fenced code', () => {
+    const document = doc('code.md', [
+      'Используйте `value . next`.',
+      '```text',
+      'value . next',
+      '```',
+    ].join('\n'));
+
+    expect(spaceBeforePunctuationRule.run({documents: [document], config})).toHaveLength(0);
+  });
+
+
+
+  it('reports multiple spaces inside prose', () => {
+    const findings = multipleSpacesRule.run({
+      documents: [doc('style.md', 'Откройте  файл.')],
+      config,
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0].ruleId).toBe('multiple-spaces');
+  });
+
+  it('does not report indentation or spaces inside inline and fenced code', () => {
+    const document = doc('safe.md', [
+      '    вложенный элемент',
+      'Используйте `a  b`.',
+      '```text',
+      'a  b',
+      '```',
+    ].join('\n'));
+
+    expect(multipleSpacesRule.run({documents: [document], config})).toHaveLength(0);
+  });
+
+  it('does not report mixed alphabets across hyphens or slashes', () => {
+    const document = doc('safe.md', [
+      'Используйте URL-адрес.',
+      'Укажите Java-класс.',
+      'Выберите Local/LDAP.',
+    ].join('\n'));
+
+    expect(mixedAlphabetRule.run({documents: [document], config})).toHaveLength(0);
+  });
+
+  it('reports latin letters inside a predominantly russian token', () => {
+    const findings = mixedAlphabetRule.run({
+      documents: [doc('mixed.md', 'Настройте сервиc.')],
+      config,
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0].message).toContain('латин');
+  });
+
+  it('reports cyrillic letters inside a predominantly latin identifier', () => {
+    const findings = mixedAlphabetRule.run({
+      documents: [doc('mixed.md', 'Используйте kаfka для проверки.')],
+      config,
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0].message).toContain('кирил');
+  });
+
+  it('does not report normal russian and latin words or inline code', () => {
+    const document = doc('safe.md', [
+      'Apache Kafka работает стабильно.',
+      'Настройте сервис.',
+      'Используйте `kаfka` только как пример кода.',
+    ].join('\n'));
+
+    expect(mixedAlphabetRule.run({documents: [document], config})).toHaveLength(0);
+  });
+
+  it('treats underscores, hyphens, slashes and dots as mixed-alphabet separators', () => {
+    const document = doc('safe.md', [
+      'Используйте URL-адрес.',
+      'Укажите Java-класс.',
+      'Выберите Local/LDAP.',
+      'Параметр имя_репозитория_в_yum_repo_в_нашем_примере_rt.',
+      'Компонент RT.DataLake.',
+    ].join('\n'));
+
+    expect(mixedAlphabetRule.run({documents: [document], config})).toHaveLength(0);
+  });
+
+  it('reports and highlights the suspicious cyrillic letter in dс01', () => {
+    const findings = mixedAlphabetRule.run({
+      documents: [doc('mixed.md', 'Используйте dс01 для подключения.')],
+      config,
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0].message).toContain('с');
+    expect(findings[0].highlights).toEqual([{start: 13, end: 14}]);
+  });
+
+  it('reports and highlights the suspicious latin letter in a russian word', () => {
+    const findings = mixedAlphabetRule.run({
+      documents: [doc('mixed.md', 'Настройте сервиc.')],
+      config,
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0].highlights).toEqual([{start: 15, end: 16}]);
+  });
+
+  it('does not report multiple spaces in markdown or yfm table rows', () => {
+    const document = doc('table.md', [
+      '|| Просмотр событий провайдера   | ✓ | ✓ |   | ✓ |   ||',
+      '| Термин (cокращение)  | Определение |',
+    ].join('\n'));
+
+    expect(multipleSpacesRule.run({documents: [document], config})).toHaveLength(0);
   });
 
 });

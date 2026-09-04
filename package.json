@@ -1,8 +1,8 @@
 {
   "name": "documentation-reviewer",
-  "version": "0.3.3",
+  "version": "0.4.3",
   "private": true,
-  "description": "Local read-only Markdown documentation reviewer",
+  "description": "ДокРевью — локальный read-only ревьюер технической документации",
   "main": "./out/main/index.js",
   "scripts": {
     "reviewer:dev": "electron-vite build && electron .",

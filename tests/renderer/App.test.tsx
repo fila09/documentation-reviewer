@@ -71,7 +71,7 @@ describe('App', () => {
     expect(await screen.findByText('C:\\project')).toBeInTheDocument();
     expect(screen.getByText('C:\\project\\docs\\ru')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', {name: 'Изменить'}));
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить папку'}));
     expect(await screen.findByText('C:\\project\\documentation\\manual')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', {name: 'Проверить проект'}));
@@ -130,6 +130,15 @@ describe('App', () => {
     expect(screen.getByRole('button', {name: 'Все 1'})).toBeInTheDocument();
     expect(screen.getByRole('button', {name: 'Ошибки 0'})).toBeDisabled();
     expect(screen.getByRole('button', {name: 'Информация 1'})).not.toBeDisabled();
+  });
+
+  it('uses the russian product name and groups project actions in the header', () => {
+    render(<App />);
+
+    expect(screen.getByRole('heading', {name: 'ДокРевью'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Выбрать проект'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Выбрать папку'})).toBeDisabled();
+    expect(screen.getByRole('button', {name: 'Проверить проект'})).toHaveClass('primary-action');
   });
 
 });
