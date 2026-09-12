@@ -33,7 +33,12 @@ export async function reviewProject(projectRoot: string, docsRoot: string): Prom
 
   for (const rule of rules) {
     try {
-      findings.push(...rule.run({documents, config: reviewerConfig}));
+      findings.push(...rule.run({
+        documents,
+        config: reviewerConfig,
+        projectRoot: resolved.projectRoot,
+        docsRoot: resolved.docsRoot,
+      }));
     } catch (error) {
       diagnostics.push({
         source: 'rule',

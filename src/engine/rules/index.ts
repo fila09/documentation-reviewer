@@ -12,10 +12,13 @@ import {undesirablePhraseRule} from './undesirablePhrase';
 import {listWithoutIntroRule} from './listWithoutIntro';
 import {skippedHeadingLevelRule} from './skippedHeadingLevel';
 import {repeatedWordRule} from './repeatedWord';
+import {duplicateContentRule} from './duplicateContent';
 
 export interface RuleContext {
   documents: ParsedDocument[];
   config: ReviewerConfig;
+  projectRoot?: string;
+  docsRoot?: string;
 }
 
 export interface ReviewRule {
@@ -33,7 +36,11 @@ export const rules: ReviewRule[] = [
   duplicateExplicitAnchorRule,
   emptyLinkRule,
   undesirablePhraseRule,
-  listWithoutIntroRule,
+  // listWithoutIntroRule, // Временно отключено: слишком много ложных срабатываний.
   skippedHeadingLevelRule,
   repeatedWordRule,
+  duplicateContentRule,
 ];
+
+// Экспорт оставлен, чтобы правило можно было тестировать и быстро вернуть в активный набор.
+export {listWithoutIntroRule};

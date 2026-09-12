@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "ДокРевью: build VS Code extension",
+      "type": "npm",
+      "script": "reviewer:vscode:build",
+      "problemMatcher": []
+    }
+  ]
+}

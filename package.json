@@ -8,7 +8,9 @@
     "reviewer:dev": "electron-vite build && electron .",
     "reviewer:build": "electron-vite build",
     "reviewer:test": "vitest run",
-    "reviewer:test:watch": "vitest"
+    "reviewer:test:watch": "vitest",
+    "reviewer:vscode:build": "esbuild extensions/vscode/src/extension.ts --bundle --platform=node --format=cjs --outfile=extensions/vscode/dist/extension.js --external:vscode",
+    "reviewer:vscode:test": "vitest run tests/vscode"
   },
   "dependencies": {
     "react": "^19.2.8",
@@ -26,6 +28,8 @@
     "jsdom": "^27.0.0",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0"
+    "@types/react-dom": "^19.2.0",
+    "@types/vscode": "^1.95.0",
+    "esbuild": "^0.25.0"
   }
 }
