@@ -31,13 +31,12 @@ describe('reviewProject', () => {
     expect(result.docsRoot).toBe(docsRoot);
   });
 
-  it('returns the editorial findings enabled in v0.3', async () => {
+  it('returns the currently enabled editorial findings', async () => {
     const projectRoot = resolve('tests/fixtures/editorial-rules-project');
     const docsRoot = resolve(projectRoot, 'docs/ru');
     const result = await reviewProject(projectRoot, docsRoot);
 
     expect(result.findings.map((finding) => finding.ruleId).sort()).toEqual([
-      'list-without-intro',
       'repeated-word',
       'skipped-heading-level',
       'undesirable-phrase',

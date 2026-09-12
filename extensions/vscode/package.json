@@ -1,0 +1,40 @@
+{
+  "name": "docreview-vscode",
+  "displayName": "ДокРевью",
+  "description": "Проверка Markdown-документации средствами ДокРевью",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": ["Linters"],
+  "activationEvents": [
+    "onCommand:docReview.runReview",
+    "onCommand:docReview.selectDocsRoot",
+    "onLanguage:markdown"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "docReview.runReview",
+        "title": "ДокРевью: Проверить документацию"
+      },
+      {
+        "command": "docReview.selectDocsRoot",
+        "title": "ДокРевью: Выбрать папку документации"
+      }
+    ],
+    "configuration": {
+      "title": "ДокРевью",
+      "properties": {
+        "docReview.docsRoot": {
+          "type": "string",
+          "default": "",
+          "scope": "resource",
+          "description": "Путь к папке документации относительно корня workspace."
+        }
+      }
+    }
+  }
+}
