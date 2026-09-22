@@ -2,14 +2,17 @@
   "name": "docreview-vscode",
   "displayName": "ДокРевью",
   "description": "Проверка Markdown-документации средствами ДокРевью",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "engines": {
     "vscode": "^1.95.0"
   },
-  "categories": ["Linters"],
+  "categories": [
+    "Linters"
+  ],
   "activationEvents": [
     "onCommand:docReview.runReview",
+    "onCommand:docReview.runCurrentFileReview",
     "onCommand:docReview.selectDocsRoot",
     "onLanguage:markdown"
   ],
@@ -19,6 +22,10 @@
       {
         "command": "docReview.runReview",
         "title": "ДокРевью: Проверить документацию"
+      },
+      {
+        "command": "docReview.runCurrentFileReview",
+        "title": "ДокРевью: Проверить текущий файл"
       },
       {
         "command": "docReview.selectDocsRoot",

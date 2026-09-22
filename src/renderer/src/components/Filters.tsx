@@ -2,12 +2,16 @@ import type {FindingCategory, Severity} from '../../../engine/types';
 
 export type SeverityFilter = 'all' | Severity;
 export type CategoryFilter = 'all' | FindingCategory;
+export type FileFilter = 'all' | string;
 
 interface Props {
+  fileValue: FileFilter;
+  files: string[];
   severityValue: SeverityFilter;
   categoryValue: CategoryFilter;
   severityCounts: {all: number; error: number; warning: number; info: number};
   categoryCounts: {all: number} & Record<FindingCategory, number>;
+  onFileChange(value: FileFilter): void;
   onSeverityChange(value: SeverityFilter): void;
   onCategoryChange(value: CategoryFilter): void;
 }
@@ -25,15 +29,29 @@ export function categoryLabel(category: FindingCategory): string {
 }
 
 export function Filters({
+  fileValue,
+  files,
   severityValue,
   categoryValue,
   severityCounts,
   categoryCounts,
+  onFileChange,
   onSeverityChange,
   onCategoryChange,
 }: Props) {
   return (
     <section className="filter-groups" aria-label="Фильтры замечаний">
+      <div className="file-filter">
+        <label htmlFor="finding-file-filter">Файл</label>
+        <select
+          id="finding-file-filter"
+          value={fileValue}
+          onChange={(event) => onFileChange(event.target.value)}
+        >
+          <option value="all">Все файлы</option>
+          {files.map((file) => <option key={file} value={file}>{file}</option>)}
+        </select>
+      </div>
       <nav className="filters severity-filters" aria-label="По уровню">
         {([
           ['all', `Все ${severityCounts.all}`],

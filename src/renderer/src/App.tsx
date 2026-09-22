@@ -3,7 +3,7 @@ import type {Finding, FindingCategory, Severity} from '../../engine/types';
 import type {ReviewResult} from '../../engine/reviewProject';
 import {FindingDetails} from './components/FindingDetails';
 import {FindingsList} from './components/FindingsList';
-import {Filters, type CategoryFilter, type SeverityFilter} from './components/Filters';
+import {Filters, type CategoryFilter, type FileFilter, type SeverityFilter} from './components/Filters';
 import {ProjectHeader} from './components/ProjectHeader';
 import './styles.css';
 
@@ -12,21 +12,33 @@ export function App() {
   const [docsRoot, setDocsRoot] = useState<string | null>(null);
   const [result, setResult] = useState<ReviewResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [fileFilter, setFileFilter] = useState<FileFilter>('all');
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [selected, setSelected] = useState<Finding | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const files = useMemo(
+    () => [...(result?.checkedFilePaths ?? [])].sort(),
+    [result],
+  );
+
+  const findingsForFile = useMemo(
+    () => (result?.findings ?? []).filter((finding) =>
+      fileFilter === 'all' || finding.file === fileFilter),
+    [result, fileFilter],
+  );
+
   const visibleFindings = useMemo(
-    () => result?.findings.filter((finding) =>
+    () => findingsForFile.filter((finding) =>
       (severityFilter === 'all' || finding.severity === severityFilter)
       && (categoryFilter === 'all' || finding.category === categoryFilter),
-    ) ?? [],
-    [result, severityFilter, categoryFilter],
+    ),
+    [findingsForFile, severityFilter, categoryFilter],
   );
 
   const severityCounts = useMemo(() => {
-    const findings = (result?.findings ?? []).filter((finding) =>
+    const findings = findingsForFile.filter((finding) =>
       categoryFilter === 'all' || finding.category === categoryFilter,
     );
     const count = (severity: Severity) =>
@@ -38,10 +50,10 @@ export function App() {
       warning: count('warning'),
       info: count('info'),
     };
-  }, [result, categoryFilter]);
+  }, [findingsForFile, categoryFilter]);
 
   const categoryCounts = useMemo(() => {
-    const findings = (result?.findings ?? []).filter((finding) =>
+    const findings = findingsForFile.filter((finding) =>
       severityFilter === 'all' || finding.severity === severityFilter,
     );
     const count = (category: FindingCategory) =>
@@ -55,7 +67,7 @@ export function App() {
       markdown: count('markdown'),
       links: count('links'),
     };
-  }, [result, severityFilter]);
+  }, [findingsForFile, severityFilter]);
 
   useEffect(() => {
     if (selected && visibleFindings.includes(selected)) return;
@@ -65,6 +77,7 @@ export function App() {
   function clearReviewState() {
     setResult(null);
     setSelected(null);
+    setFileFilter('all');
     setSeverityFilter('all');
     setCategoryFilter('all');
     setError(null);
@@ -107,8 +120,9 @@ export function App() {
       const next = await window.reviewer.reviewProject(projectRoot, docsRoot);
       setResult(next);
       setSelected(next.findings[0] ?? null);
+      setFileFilter('all');
       setSeverityFilter('all');
-    setCategoryFilter('all');
+      setCategoryFilter('all');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
@@ -137,10 +151,13 @@ export function App() {
           </section>
 
           <Filters
+            fileValue={fileFilter}
+            files={files}
             severityValue={severityFilter}
             categoryValue={categoryFilter}
             severityCounts={severityCounts}
             categoryCounts={categoryCounts}
+            onFileChange={setFileFilter}
             onSeverityChange={setSeverityFilter}
             onCategoryChange={setCategoryFilter}
           />

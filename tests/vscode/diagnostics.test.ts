@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {findingToDiagnosticData} from '../../extensions/vscode/src/diagnostics';
+import {findingToDiagnosticData, findingsForCurrentFile} from '../../extensions/vscode/src/diagnostics';
 import type {Finding} from '../../src/engine/types';
 
 const baseFinding: Finding = {
@@ -42,5 +42,17 @@ describe('findingToDiagnosticData', () => {
     expect(result.message).toContain('Смешение кириллицы и латиницы');
     expect(result.message).toContain('Стиль');
     expect(result.message).toContain('Исправьте раскладку.');
+  });
+});
+
+
+describe('findingsForCurrentFile', () => {
+  it('keeps only findings for the active Markdown file', () => {
+    const findings: Finding[] = [
+      baseFinding,
+      {...baseFinding, file: 'other.md', line: 8},
+    ];
+
+    expect(findingsForCurrentFile(findings, 'guide.md')).toEqual([baseFinding]);
   });
 });
