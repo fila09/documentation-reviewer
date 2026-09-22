@@ -9,7 +9,7 @@ interface Props {
 
 export function FindingsList({findings, selected, onSelect}: Props) {
   if (findings.length === 0) {
-    return <div className="empty-state">Замечаний нет.</div>;
+    return <div className="empty-state">Замечаний не найдено</div>;
   }
 
   return (

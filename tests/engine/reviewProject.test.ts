@@ -9,6 +9,7 @@ describe('reviewProject', () => {
     const result = await reviewProject(projectRoot, docsRoot);
 
     expect(result.checkedFiles).toBe(3);
+    expect(result.checkedFilePaths).toHaveLength(3);
     expect(result.findings).toHaveLength(5);
     expect(result.findings.map((finding) => finding.ruleId).sort()).toEqual([
       'broken-local-link',

@@ -16,6 +16,7 @@ export interface ReviewResult {
   projectRoot: string;
   docsRoot: string;
   checkedFiles: number;
+  checkedFilePaths: string[];
   findings: Finding[];
   diagnostics: ReviewDiagnostic[];
 }
@@ -52,6 +53,7 @@ export async function reviewProject(projectRoot: string, docsRoot: string): Prom
     projectRoot: resolved.projectRoot,
     docsRoot: resolved.docsRoot,
     checkedFiles: scanResult.files.length,
+    checkedFilePaths: scanResult.files.map((file) => file.relativePath),
     findings: sortFindings(findings),
     diagnostics,
   };

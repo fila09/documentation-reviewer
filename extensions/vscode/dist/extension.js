@@ -868,6 +868,10 @@ ${finding.message}${recommendation}`,
     }
   };
 }
+function findingsForCurrentFile(findings, relativeFile) {
+  const normalized = relativeFile.replace(/\\/g, "/");
+  return findings.filter((finding) => finding.file.replace(/\\/g, "/") === normalized);
+}
 
 // extensions/vscode/src/extension.ts
 var diagnosticSource = "\u0414\u043E\u043A\u0420\u0435\u0432\u044C\u044E";
@@ -948,6 +952,46 @@ async function runFullReview(collection) {
     await vscode.window.showErrorMessage(`\u0414\u043E\u043A\u0420\u0435\u0432\u044C\u044E: ${message}`);
   }
 }
+async function runCurrentFileReview(collection) {
+  const projectRoot = getWorkspaceRoot();
+  if (!projectRoot) {
+    await vscode.window.showWarningMessage("\u0414\u043E\u043A\u0420\u0435\u0432\u044C\u044E: \u0441\u043D\u0430\u0447\u0430\u043B\u0430 \u043E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u043F\u0430\u043F\u043A\u0443 \u043F\u0440\u043E\u0435\u043A\u0442\u0430 \u0432 VS Code.");
+    return;
+  }
+  const editor = vscode.window.activeTextEditor;
+  if (!editor || editor.document.languageId !== "markdown") {
+    await vscode.window.showWarningMessage("\u0414\u043E\u043A\u0420\u0435\u0432\u044C\u044E: \u043E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 Markdown-\u0444\u0430\u0439\u043B, \u043A\u043E\u0442\u043E\u0440\u044B\u0439 \u0445\u043E\u0442\u0438\u0442\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C.");
+    return;
+  }
+  if (editor.document.isDirty) {
+    await vscode.window.showWarningMessage("\u0414\u043E\u043A\u0420\u0435\u0432\u044C\u044E: \u0441\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u0435 \u0442\u0435\u043A\u0443\u0449\u0438\u0439 \u0444\u0430\u0439\u043B \u043F\u0435\u0440\u0435\u0434 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u043E\u0439.");
+    return;
+  }
+  const docsRoot = await getDocsRoot(projectRoot);
+  if (!docsRoot) {
+    await vscode.window.showWarningMessage(
+      "\u0414\u043E\u043A\u0420\u0435\u0432\u044C\u044E: \u043F\u0430\u043F\u043A\u0430 docs/ru \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u0430. \u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u043F\u0430\u043F\u043A\u0443 \u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u0430\u0446\u0438\u0438 \u043A\u043E\u043C\u0430\u043D\u0434\u043E\u0439 \xAB\u0414\u043E\u043A\u0420\u0435\u0432\u044C\u044E: \u0412\u044B\u0431\u0440\u0430\u0442\u044C \u043F\u0430\u043F\u043A\u0443 \u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u0430\u0446\u0438\u0438\xBB."
+    );
+    return;
+  }
+  const relativeFile = (0, import_node_path4.relative)(docsRoot, editor.document.uri.fsPath);
+  if (!relativeFile || relativeFile === ".." || relativeFile.startsWith("../") || relativeFile.startsWith("..\\") || (0, import_node_path4.isAbsolute)(relativeFile)) {
+    await vscode.window.showWarningMessage("\u0414\u043E\u043A\u0420\u0435\u0432\u044C\u044E: \u0442\u0435\u043A\u0443\u0449\u0438\u0439 \u0444\u0430\u0439\u043B \u043D\u0430\u0445\u043E\u0434\u0438\u0442\u0441\u044F \u0432\u043D\u0435 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0439 \u043F\u0430\u043F\u043A\u0438 \u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u0430\u0446\u0438\u0438.");
+    return;
+  }
+  try {
+    const result = await reviewProject(projectRoot, docsRoot);
+    const findings = findingsForCurrentFile(result.findings, relativeFile);
+    await publishFindings(collection, result.docsRoot, findings);
+    const suffix = findings.length === 1 ? "\u0437\u0430\u043C\u0435\u0447\u0430\u043D\u0438\u0435" : "\u0437\u0430\u043C\u0435\u0447\u0430\u043D\u0438\u0439";
+    await vscode.window.showInformationMessage(
+      `\u0414\u043E\u043A\u0420\u0435\u0432\u044C\u044E: \u0432 \u0442\u0435\u043A\u0443\u0449\u0435\u043C \u0444\u0430\u0439\u043B\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E ${findings.length} ${suffix}.`
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    await vscode.window.showErrorMessage(`\u0414\u043E\u043A\u0420\u0435\u0432\u044C\u044E: ${message}`);
+  }
+}
 async function selectDocsRoot() {
   const projectRoot = getWorkspaceRoot();
   if (!projectRoot) {
@@ -978,6 +1022,7 @@ function activate(context) {
   context.subscriptions.push(
     diagnostics,
     vscode.commands.registerCommand("docReview.runReview", () => runFullReview(diagnostics)),
+    vscode.commands.registerCommand("docReview.runCurrentFileReview", () => runCurrentFileReview(diagnostics)),
     vscode.commands.registerCommand("docReview.selectDocsRoot", selectDocsRoot)
   );
 }

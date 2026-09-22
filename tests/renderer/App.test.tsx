@@ -9,6 +9,7 @@ const reviewResult = {
   projectRoot: 'C:\\project',
   docsRoot: 'C:\\project\\documentation\\manual',
   checkedFiles: 3,
+  checkedFilePaths: ['guide.md', 'index.md', 'clean.md'],
   diagnostics: [],
   findings: [
     {
@@ -139,6 +140,38 @@ describe('App', () => {
     expect(screen.getByRole('button', {name: 'Выбрать проект'})).toBeInTheDocument();
     expect(screen.getByRole('button', {name: 'Выбрать папку'})).toBeDisabled();
     expect(screen.getByRole('button', {name: 'Проверить проект'})).toHaveClass('primary-action');
+  });
+
+  it('shows checked files without findings and allows selecting them', async () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', {name: 'Выбрать проект'}));
+    await screen.findByText('C:\\project');
+    fireEvent.click(screen.getByRole('button', {name: 'Проверить проект'}));
+    await screen.findByText('Проверено: 3');
+
+    expect(screen.getByRole('option', {name: 'clean.md'})).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Файл'), {target: {value: 'clean.md'}});
+
+    expect(screen.getByText('Замечаний не найдено')).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Все 0'})).toBeInTheDocument();
+  });
+
+  it('filters findings by file and recalculates counts for the selected file', async () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', {name: 'Выбрать проект'}));
+    await screen.findByText('C:\\project');
+    fireEvent.click(screen.getByRole('button', {name: 'Проверить проект'}));
+    await screen.findByText('Проверено: 3');
+
+    fireEvent.change(screen.getByLabelText('Файл'), {target: {value: 'guide.md'}});
+
+    expect(screen.queryByText('Несуществующий якорь')).not.toBeInTheDocument();
+    expect(screen.getAllByText('Пропущен уровень заголовка')).toHaveLength(2);
+    expect(screen.getByText('Список без вводного текста')).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Все 2'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Предупреждения 1'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Информация 1'})).toBeInTheDocument();
   });
 
 });

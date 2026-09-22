@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import {suggestDefaultDocsRoot} from '../../../src/engine/projectPaths';
 import {reviewProject} from '../../../src/engine/reviewProject';
 import type {Finding, Severity} from '../../../src/engine/types';
-import {findingToDiagnosticData} from './diagnostics';
+import {findingToDiagnosticData, findingsForCurrentFile} from './diagnostics';
 
 const diagnosticSource = 'ДокРевью';
 
@@ -106,6 +106,54 @@ async function runFullReview(collection: vscode.DiagnosticCollection): Promise<v
   }
 }
 
+async function runCurrentFileReview(collection: vscode.DiagnosticCollection): Promise<void> {
+  const projectRoot = getWorkspaceRoot();
+  if (!projectRoot) {
+    await vscode.window.showWarningMessage('ДокРевью: сначала откройте папку проекта в VS Code.');
+    return;
+  }
+
+  const editor = vscode.window.activeTextEditor;
+  if (!editor || editor.document.languageId !== 'markdown') {
+    await vscode.window.showWarningMessage('ДокРевью: откройте Markdown-файл, который хотите проверить.');
+    return;
+  }
+
+  if (editor.document.isDirty) {
+    await vscode.window.showWarningMessage('ДокРевью: сохраните текущий файл перед проверкой.');
+    return;
+  }
+
+  const docsRoot = await getDocsRoot(projectRoot);
+  if (!docsRoot) {
+    await vscode.window.showWarningMessage(
+      'ДокРевью: папка docs/ru не найдена. Укажите папку документации командой «ДокРевью: Выбрать папку документации».',
+    );
+    return;
+  }
+
+  const relativeFile = relative(docsRoot, editor.document.uri.fsPath);
+  if (!relativeFile || relativeFile === '..' || relativeFile.startsWith('../')
+    || relativeFile.startsWith('..\\') || isAbsolute(relativeFile)) {
+    await vscode.window.showWarningMessage('ДокРевью: текущий файл находится вне выбранной папки документации.');
+    return;
+  }
+
+  try {
+    const result = await reviewProject(projectRoot, docsRoot);
+    const findings = findingsForCurrentFile(result.findings, relativeFile);
+    await publishFindings(collection, result.docsRoot, findings);
+
+    const suffix = findings.length === 1 ? 'замечание' : 'замечаний';
+    await vscode.window.showInformationMessage(
+      `ДокРевью: в текущем файле найдено ${findings.length} ${suffix}.`,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    await vscode.window.showErrorMessage(`ДокРевью: ${message}`);
+  }
+}
+
 async function selectDocsRoot(): Promise<void> {
   const projectRoot = getWorkspaceRoot();
   if (!projectRoot) {
@@ -144,6 +192,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     diagnostics,
     vscode.commands.registerCommand('docReview.runReview', () => runFullReview(diagnostics)),
+    vscode.commands.registerCommand('docReview.runCurrentFileReview', () => runCurrentFileReview(diagnostics)),
     vscode.commands.registerCommand('docReview.selectDocsRoot', selectDocsRoot),
   );
 }

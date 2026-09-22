@@ -51,3 +51,9 @@ export function findingToDiagnosticData(
     },
   };
 }
+
+
+export function findingsForCurrentFile(findings: Finding[], relativeFile: string): Finding[] {
+  const normalized = relativeFile.replace(/\\/g, '/');
+  return findings.filter((finding) => finding.file.replace(/\\/g, '/') === normalized);
+}
