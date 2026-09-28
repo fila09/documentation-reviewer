@@ -23,9 +23,7 @@ function HighlightedSource({source, highlights}: {source: string; highlights?: S
 }
 
 export function FindingDetails({finding}: {finding: Finding | null}) {
-  if (!finding) {
-    return <div className="empty-state">Выберите замечание слева.</div>;
-  }
+  if (!finding) return null;
 
   const severityLabel =
     finding.severity === 'error'

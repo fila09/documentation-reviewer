@@ -21,6 +21,14 @@ export interface ReviewResult {
   diagnostics: ReviewDiagnostic[];
 }
 
+export interface FileReviewResult {
+  projectRoot: string;
+  docsRoot: string;
+  file: string;
+  findings: Finding[];
+  diagnostics: ReviewDiagnostic[];
+}
+
 export async function reviewProject(projectRoot: string, docsRoot: string): Promise<ReviewResult> {
   const resolved = await resolveProjectPaths(projectRoot, docsRoot);
 
@@ -56,5 +64,26 @@ export async function reviewProject(projectRoot: string, docsRoot: string): Prom
     checkedFilePaths: scanResult.files.map((file) => file.relativePath),
     findings: sortFindings(findings),
     diagnostics,
+  };
+}
+
+export async function reviewFile(
+  projectRoot: string,
+  docsRoot: string,
+  relativePath: string,
+): Promise<FileReviewResult> {
+  const normalizedPath = relativePath.replaceAll('\\', '/');
+  const result = await reviewProject(projectRoot, docsRoot);
+
+  if (!result.checkedFilePaths.includes(normalizedPath)) {
+    throw new Error(`Файл документации не найден: ${normalizedPath}`);
+  }
+
+  return {
+    projectRoot: result.projectRoot,
+    docsRoot: result.docsRoot,
+    file: normalizedPath,
+    findings: result.findings.filter((finding) => finding.file === normalizedPath),
+    diagnostics: result.diagnostics,
   };
 }

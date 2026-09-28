@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {resolve} from 'node:path';
-import {reviewProject} from '../../src/engine/reviewProject';
+import {reviewFile, reviewProject} from '../../src/engine/reviewProject';
 
 describe('reviewProject', () => {
   it('returns exactly five known findings for an explicitly selected docs/ru directory', async () => {
@@ -53,4 +53,15 @@ describe('reviewProject', () => {
       'Папка документации должна находиться внутри выбранного проекта.',
     );
   });
+
+  it('returns findings only for the selected file when refreshing one file', async () => {
+    const projectRoot = resolve('tests/fixtures/five-findings-project');
+    const docsRoot = resolve(projectRoot, 'docs/ru');
+    const result = await reviewFile(projectRoot, docsRoot, 'index.md');
+
+    expect(result.file).toBe('index.md');
+    expect(result.findings.length).toBeGreaterThan(0);
+    expect(result.findings.every((finding) => finding.file === 'index.md')).toBe(true);
+  });
+
 });

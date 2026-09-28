@@ -1,6 +1,6 @@
 import {dialog, ipcMain} from 'electron';
 import {resolveProjectPaths, suggestDefaultDocsRoot} from '../engine/projectPaths';
-import {reviewProject} from '../engine/reviewProject';
+import {reviewFile, reviewProject} from '../engine/reviewProject';
 import type {ProjectSelection} from '../shared/reviewer-api';
 
 export function registerReviewerIpc(): void {
@@ -46,5 +46,25 @@ export function registerReviewerIpc(): void {
     }
 
     return reviewProject(projectRoot, docsRoot);
+  });
+
+
+  ipcMain.handle('reviewer:run-file', async (
+    _event,
+    projectRoot: string,
+    docsRoot: string,
+    relativePath: string,
+  ) => {
+    if (typeof projectRoot !== 'string' || projectRoot.trim() === '') {
+      throw new Error('Не выбрана папка проекта.');
+    }
+    if (typeof docsRoot !== 'string' || docsRoot.trim() === '') {
+      throw new Error('Не выбрана папка документации.');
+    }
+    if (typeof relativePath !== 'string' || relativePath.trim() === '') {
+      throw new Error('Не выбран файл документации.');
+    }
+
+    return reviewFile(projectRoot, docsRoot, relativePath);
   });
 }

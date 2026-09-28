@@ -12,6 +12,8 @@ interface Props {
   severityCounts: {all: number; error: number; warning: number; info: number};
   categoryCounts: {all: number} & Record<FindingCategory, number>;
   onFileChange(value: FileFilter): void;
+  onRefreshFile(): void;
+  refreshingFile?: boolean;
   onSeverityChange(value: SeverityFilter): void;
   onCategoryChange(value: CategoryFilter): void;
 }
@@ -36,6 +38,8 @@ export function Filters({
   severityCounts,
   categoryCounts,
   onFileChange,
+  onRefreshFile,
+  refreshingFile = false,
   onSeverityChange,
   onCategoryChange,
 }: Props) {
@@ -51,6 +55,19 @@ export function Filters({
           <option value="all">Все файлы</option>
           {files.map((file) => <option key={file} value={file}>{file}</option>)}
         </select>
+        <button
+          type="button"
+          className="file-refresh-button"
+          aria-label="Проверить файл повторно"
+          title="Проверить файл повторно"
+          disabled={fileValue === 'all' || refreshingFile}
+          onClick={onRefreshFile}
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+            <path d="M23 4V10H17" />
+            <path d="M20.4899 15C19.8399 16.8399 18.6094 18.4187 16.984 19.4985C15.3586 20.5783 13.4263 21.1006 11.4783 20.9866C9.53026 20.8726 7.67203 20.1286 6.18363 18.8667C4.69524 17.6047 3.6573 15.8932 3.22625 13.9901C2.79519 12.0869 2.99436 10.0952 3.79374 8.31508C4.59313 6.53496 5.94942 5.06288 7.65823 4.12065C9.36705 3.17843 11.3358 2.81711 13.2678 3.09116C15.1999 3.3652 16.9905 4.25975 18.3699 5.64001L22.9999 10" />
+          </svg>
+        </button>
       </div>
       <nav className="filters severity-filters" aria-label="По уровню">
         {([
@@ -88,11 +105,9 @@ export function Filters({
               key={category}
               className={categoryValue === category ? 'active' : ''}
               disabled={count === 0}
-              onClick={() => onCategoryChange(
-                categoryValue === category ? 'all' : category,
-              )}
+              onClick={() => onCategoryChange(category)}
             >
-              {categoryLabels[category]} {count}
+              {categoryLabel(category)} {count}
             </button>
           );
         })}
