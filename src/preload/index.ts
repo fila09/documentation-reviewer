@@ -6,4 +6,6 @@ contextBridge.exposeInMainWorld('reviewer', {
     ipcRenderer.invoke('reviewer:select-docs-root', projectRoot),
   reviewProject: (projectRoot: string, docsRoot: string) =>
     ipcRenderer.invoke('reviewer:run', projectRoot, docsRoot),
+  reviewFile: (projectRoot: string, docsRoot: string, relativePath: string) =>
+    ipcRenderer.invoke('reviewer:run-file', projectRoot, docsRoot, relativePath),
 });

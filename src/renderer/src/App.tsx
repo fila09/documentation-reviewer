@@ -1,6 +1,7 @@
 import {useEffect, useMemo, useState} from 'react';
 import type {Finding, FindingCategory, Severity} from '../../engine/types';
 import type {ReviewResult} from '../../engine/reviewProject';
+import {sortFindings} from '../../engine/reporter';
 import {FindingDetails} from './components/FindingDetails';
 import {FindingsList} from './components/FindingsList';
 import {Filters, type CategoryFilter, type FileFilter, type SeverityFilter} from './components/Filters';
@@ -117,12 +118,43 @@ export function App() {
     setError(null);
 
     try {
+      const previousFile = fileFilter;
       const next = await window.reviewer.reviewProject(projectRoot, docsRoot);
+      const nextFile = previousFile !== 'all' && next.checkedFilePaths.includes(previousFile)
+        ? previousFile
+        : 'all';
+
       setResult(next);
-      setSelected(next.findings[0] ?? null);
-      setFileFilter('all');
+      setFileFilter(nextFile);
       setSeverityFilter('all');
       setCategoryFilter('all');
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function refreshSelectedFile() {
+    if (!projectRoot || !docsRoot || fileFilter === 'all' || !result) return;
+
+    const file = fileFilter;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const refreshed = await window.reviewer.reviewFile(projectRoot, docsRoot, file);
+      setResult((current) => {
+        if (!current) return current;
+
+        return {
+          ...current,
+          findings: sortFindings([
+            ...current.findings.filter((finding) => finding.file !== file),
+            ...refreshed.findings,
+          ]),
+        };
+      });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
@@ -158,18 +190,26 @@ export function App() {
             severityCounts={severityCounts}
             categoryCounts={categoryCounts}
             onFileChange={setFileFilter}
+            onRefreshFile={refreshSelectedFile}
+            refreshingFile={loading}
             onSeverityChange={setSeverityFilter}
             onCategoryChange={setCategoryFilter}
           />
 
-          <section className="workspace">
-            <FindingsList
-              findings={visibleFindings}
-              selected={selected}
-              onSelect={setSelected}
-            />
-            <FindingDetails finding={selected} />
-          </section>
+          {visibleFindings.length === 0 ? (
+            <section className="workspace workspace-empty">
+              <div className="empty-state">Замечаний не найдено</div>
+            </section>
+          ) : (
+            <section className="workspace">
+              <FindingsList
+                findings={visibleFindings}
+                selected={selected}
+                onSelect={setSelected}
+              />
+              <FindingDetails finding={selected} />
+            </section>
+          )}
         </>
       )}
     </main>
