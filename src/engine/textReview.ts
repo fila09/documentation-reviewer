@@ -1,4 +1,5 @@
 import type {ParsedDocument} from './parser';
+import {terminology, termVariants} from '../shared/terminology';
 import type {Finding} from './types';
 import aff from './dictionaries/ru_RU.aff?raw';
 import dic from './dictionaries/ru_RU.dic?raw';
@@ -17,7 +18,7 @@ async function createSpellChecker(): Promise<SpellChecker> {
 
   // Небольшой встроенный словарь терминов ДокРевью. Его можно расширять
   // по результатам реальной работы, не изменяя основной русский словарь.
-  for (const word of ['ДокРевью', 'Диплодок', 'слабоструктурированный']) {
+  for (const word of [...new Set(['ДокРевью', 'Диплодок', 'слабоструктурированный', ...terminology.filter((entry) => entry.kind === 'Допустимый').flatMap((entry) => entry.preferred.split(',').map((word) => word.trim()))])]) {
     spell.add(word);
   }
 
@@ -31,6 +32,7 @@ async function getSpellChecker(): Promise<SpellChecker> {
 
 const TOKEN_PATTERN = /[\p{L}\p{N}_-]+/gu;
 const RUSSIAN_WORD_PATTERN = /^[А-Яа-яЁё]+(?:-[А-Яа-яЁё]+)*$/u;
+const TERM_VARIANTS = new Map(termVariants.map((entry) => [entry.value.toLocaleLowerCase('ru-RU'), entry]));
 const UPPERCASE_ABBREVIATION = /^[А-ЯЁ]{2,}$/u;
 
 function blank(value: string): string {
@@ -104,9 +106,25 @@ export async function reviewRussianSpelling(documents: ParsedDocument[]): Promis
 
       for (const match of prose.matchAll(TOKEN_PATTERN)) {
         const word = match[0];
-        if (!shouldCheckWord(word) || isCorrect(spell, word)) continue;
-
+        if (!shouldCheckWord(word)) continue;
         const start = match.index ?? 0;
+        const variant = TERM_VARIANTS.get(word.toLocaleLowerCase('ru-RU'));
+        if (variant) {
+          findings.push({
+            ruleId: variant.category === 'style' ? 'terminology-style' : 'terminology-variant',
+            category: variant.category,
+            severity: 'warning',
+            file: document.file.relativePath,
+            line: index + 1,
+            title: variant.category === 'style' ? 'Нежелательный вариант термина' : 'Ошибка в термине',
+            message: `Найден вариант «${word}».`,
+            source,
+            recommendation: `Используйте «${variant.replacement}».`,
+            highlights: [{start, end: start + word.length}],
+          });
+          continue;
+        }
+        if (isCorrect(spell, word)) continue;
         findings.push({
           ruleId: 'russian-spelling',
           category: 'text',
