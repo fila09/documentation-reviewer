@@ -8,4 +8,8 @@ contextBridge.exposeInMainWorld('reviewer', {
     ipcRenderer.invoke('reviewer:run', projectRoot, docsRoot),
   reviewFile: (projectRoot: string, docsRoot: string, relativePath: string) =>
     ipcRenderer.invoke('reviewer:run-file', projectRoot, docsRoot, relativePath),
+  reviewTextProject: (projectRoot: string, docsRoot: string) =>
+    ipcRenderer.invoke('reviewer:run-text', projectRoot, docsRoot),
+  reviewTextFile: (projectRoot: string, docsRoot: string, relativePath: string) =>
+    ipcRenderer.invoke('reviewer:run-text-file', projectRoot, docsRoot, relativePath),
 });

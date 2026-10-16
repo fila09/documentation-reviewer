@@ -5,6 +5,8 @@ interface Props {
   onSelectProject(): void;
   onSelectDocsRoot(): void;
   onReview(): void;
+  onReviewText(): void;
+  reviewingText?: boolean;
 }
 
 export function ProjectHeader({
@@ -14,6 +16,8 @@ export function ProjectHeader({
   onSelectProject,
   onSelectDocsRoot,
   onReview,
+  onReviewText,
+  reviewingText = false,
 }: Props) {
   return (
     <header className="project-header">
@@ -36,13 +40,22 @@ export function ProjectHeader({
             {docsRoot ? 'Изменить папку' : 'Выбрать папку'}
           </button>
         </div>
-        <button
-          className="primary-action"
-          onClick={onReview}
-          disabled={!projectRoot || !docsRoot || loading}
-        >
-          {loading ? 'Проверяем…' : 'Проверить проект'}
-        </button>
+        <div className="review-actions">
+          <button
+            className="primary-action"
+            onClick={onReview}
+            disabled={!projectRoot || !docsRoot || loading}
+          >
+            {loading && !reviewingText ? 'Проверяем…' : 'Проверить проект'}
+          </button>
+          <button
+            className="text-review-action"
+            onClick={onReviewText}
+            disabled={!projectRoot || !docsRoot || loading}
+          >
+            {reviewingText ? 'Проверяем текст…' : 'Проверить текст'}
+          </button>
+        </div>
       </div>
     </header>
   );

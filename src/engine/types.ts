@@ -1,5 +1,5 @@
 export type Severity = 'error' | 'warning' | 'info';
-export type FindingCategory = 'structure' | 'style' | 'terminology' | 'markdown' | 'links';
+export type FindingCategory = 'structure' | 'style' | 'terminology' | 'markdown' | 'links' | 'text';
 
 export interface SourceHighlight {
   start: number;

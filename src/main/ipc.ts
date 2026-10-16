@@ -1,6 +1,7 @@
 import {dialog, ipcMain} from 'electron';
 import {resolveProjectPaths, suggestDefaultDocsRoot} from '../engine/projectPaths';
 import {reviewFile, reviewProject} from '../engine/reviewProject';
+import {reviewTextFile, reviewTextProject} from '../engine/textReviewProject';
 import type {ProjectSelection} from '../shared/reviewer-api';
 
 export function registerReviewerIpc(): void {
@@ -67,4 +68,35 @@ export function registerReviewerIpc(): void {
 
     return reviewFile(projectRoot, docsRoot, relativePath);
   });
+
+  ipcMain.handle('reviewer:run-text', async (_event, projectRoot: string, docsRoot: string) => {
+    if (typeof projectRoot !== 'string' || projectRoot.trim() === '') {
+      throw new Error('Не выбрана папка проекта.');
+    }
+    if (typeof docsRoot !== 'string' || docsRoot.trim() === '') {
+      throw new Error('Не выбрана папка документации.');
+    }
+
+    return reviewTextProject(projectRoot, docsRoot);
+  });
+
+  ipcMain.handle('reviewer:run-text-file', async (
+    _event,
+    projectRoot: string,
+    docsRoot: string,
+    relativePath: string,
+  ) => {
+    if (typeof projectRoot !== 'string' || projectRoot.trim() === '') {
+      throw new Error('Не выбрана папка проекта.');
+    }
+    if (typeof docsRoot !== 'string' || docsRoot.trim() === '') {
+      throw new Error('Не выбрана папка документации.');
+    }
+    if (typeof relativePath !== 'string' || relativePath.trim() === '') {
+      throw new Error('Не выбран файл документации.');
+    }
+
+    return reviewTextFile(projectRoot, docsRoot, relativePath);
+  });
+
 }

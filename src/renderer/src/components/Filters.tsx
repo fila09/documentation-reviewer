@@ -24,6 +24,7 @@ const categoryLabels: Record<FindingCategory, string> = {
   terminology: 'Терминология',
   markdown: 'Markdown',
   links: 'Ссылки',
+  text: 'Текст',
 };
 
 export function categoryLabel(category: FindingCategory): string {

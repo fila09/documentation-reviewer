@@ -6,13 +6,16 @@ import {FindingDetails} from './components/FindingDetails';
 import {FindingsList} from './components/FindingsList';
 import {Filters, type CategoryFilter, type FileFilter, type SeverityFilter} from './components/Filters';
 import {ProjectHeader} from './components/ProjectHeader';
+import {RulesPage, TerminologyPage} from './components/ReferencePages';
 import './styles.css';
 
 export function App() {
+  const [page, setPage] = useState<'review' | 'terms' | 'rules'>('review');
   const [projectRoot, setProjectRoot] = useState<string | null>(null);
   const [docsRoot, setDocsRoot] = useState<string | null>(null);
   const [result, setResult] = useState<ReviewResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [reviewingText, setReviewingText] = useState(false);
   const [fileFilter, setFileFilter] = useState<FileFilter>('all');
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
@@ -67,6 +70,7 @@ export function App() {
       terminology: count('terminology'),
       markdown: count('markdown'),
       links: count('links'),
+      text: count('text'),
     };
   }, [findingsForFile, severityFilter]);
 
@@ -135,6 +139,39 @@ export function App() {
     }
   }
 
+
+
+  async function runTextReview() {
+    if (!projectRoot || !docsRoot) return;
+
+    setLoading(true);
+    setReviewingText(true);
+    setError(null);
+
+    try {
+      if (fileFilter !== 'all' && result) {
+        const next = await window.reviewer.reviewTextFile(projectRoot, docsRoot, fileFilter);
+        setResult({
+          ...result,
+          findings: sortFindings(next.findings),
+          diagnostics: next.diagnostics,
+        });
+      } else {
+        const next = await window.reviewer.reviewTextProject(projectRoot, docsRoot);
+        setResult(next);
+        setFileFilter('all');
+      }
+
+      setSeverityFilter('all');
+      setCategoryFilter('all');
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setReviewingText(false);
+      setLoading(false);
+    }
+  }
+
   async function refreshSelectedFile() {
     if (!projectRoot || !docsRoot || fileFilter === 'all' || !result) return;
 
@@ -171,8 +208,18 @@ export function App() {
         onSelectProject={selectProject}
         onSelectDocsRoot={selectDocsRoot}
         onReview={runReview}
+        onReviewText={runTextReview}
+        reviewingText={reviewingText}
       />
 
+      <nav className="app-tabs" aria-label="Разделы приложения">
+        <button type="button" className={page === 'review' ? 'active' : ''} aria-current={page === 'review' ? 'page' : undefined} onClick={() => setPage('review')}>Проверка</button>
+        <button type="button" className={page === 'terms' ? 'active' : ''} aria-current={page === 'terms' ? 'page' : undefined} onClick={() => setPage('terms')}>Словарь терминов</button>
+        <button type="button" className={page === 'rules' ? 'active' : ''} aria-current={page === 'rules' ? 'page' : undefined} onClick={() => setPage('rules')}>Правила проверки</button>
+      </nav>
+      {page === 'terms' && <TerminologyPage />}
+      {page === 'rules' && <RulesPage />}
+      {page === 'review' && <>
       {error && <div role="alert" className="error-banner">{error}</div>}
 
       {result && (
@@ -212,6 +259,7 @@ export function App() {
           )}
         </>
       )}
+      </>}
     </main>
   );
 }

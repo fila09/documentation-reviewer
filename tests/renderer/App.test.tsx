@@ -81,6 +81,8 @@ describe('App', () => {
       selectDocsRoot: vi.fn().mockResolvedValue('C:\\project\\documentation\\manual'),
       reviewProject: vi.fn().mockResolvedValue(reviewResult),
       reviewFile: vi.fn().mockResolvedValue(refreshedGuideResult),
+      reviewTextProject: vi.fn().mockResolvedValue(reviewResult),
+      reviewTextFile: vi.fn().mockResolvedValue(refreshedGuideResult),
     };
   });
 
