@@ -36,6 +36,32 @@ describe('russian text review', () => {
     expect(result.findings).toEqual([]);
   });
 
+  it('checks terminology and style without duplicate spelling warnings', async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), 'docreview-terminology-'));
+    temporaryProjects.push(projectRoot);
+    const docsRoot = join(projectRoot, 'docs', 'ru');
+    await mkdir(docsRoot, {recursive: true});
+    await writeFile(join(docsRoot, 'terms.md'),
+      'Керберизация и керберизации. Ошибка кеберизации. Работа с урлами.\n', 'utf8');
+    const result = await reviewTextFile(projectRoot, docsRoot, 'terms.md');
+    expect(result.findings.filter((finding) => finding.category === 'terminology')).toHaveLength(1);
+    expect(result.findings.filter((finding) => finding.category === 'style')).toHaveLength(1);
+    expect(result.findings.find((finding) => finding.category === 'terminology')?.recommendation).toContain('керберизации');
+    expect(result.findings.find((finding) => finding.category === 'style')?.recommendation).toContain('URL-адресами');
+    expect(result.findings.filter((finding) => finding.ruleId === 'russian-spelling')).toHaveLength(0);
+  });
+
+  it('ignores terminology in code, URLs, paths and markdown targets', async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), 'docreview-terminology-masks-'));
+    temporaryProjects.push(projectRoot);
+    const docsRoot = join(projectRoot, 'docs', 'ru');
+    await mkdir(docsRoot, {recursive: true});
+    await writeFile(join(docsRoot, 'terms.md'),
+      '`кеберизация`\n```text\nурлами\n```\nhttps://example.org/кеберизация\n[ссылка](./урлами.md)\n', 'utf8');
+    const result = await reviewTextFile(projectRoot, docsRoot, 'terms.md');
+    expect(result.findings.filter((finding) => ['terminology', 'style'].includes(finding.category))).toEqual([]);
+  });
+
   it('reviews only the selected markdown file instead of scanning the whole docs tree', async () => {
     const projectRoot = await mkdtemp(join(tmpdir(), 'docreview-text-file-'));
     temporaryProjects.push(projectRoot);
