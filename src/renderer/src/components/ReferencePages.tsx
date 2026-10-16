@@ -13,7 +13,7 @@ export function TerminologyPage() {
 
   return <section className="reference-page" aria-label="Словарь терминов">
     <h2>Словарь терминов</h2>
-    <p className="reference-muted">Справочник принятых написаний. Пока записи доступны только для просмотра и не изменяют правила проверки.</p>
+    <p className="reference-muted">Справочник принятых написаний. Ошибочные и нежелательные варианты используются при проверке текста.</p>
     <div className="reference-controls">
       <input aria-label="Поиск терминов" placeholder="Поиск термина, определения или варианта написания" value={query} onChange={(event) => setQuery(event.target.value)} />
       <select aria-label="Тип термина" value={kind} onChange={(event) => setKind(event.target.value)}>
