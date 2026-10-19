@@ -1,6 +1,6 @@
 {
   "name": "documentation-reviewer",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "private": true,
   "description": "ДокРевью — локальный read-only ревьюер технической документации",
   "main": "./out/main/index.js",
