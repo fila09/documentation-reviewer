@@ -1,10 +1,13 @@
 import {dialog, ipcMain} from 'electron';
+import {readUserWords, updateUserWords} from './userDictionary';
 import {resolveProjectPaths, suggestDefaultDocsRoot} from '../engine/projectPaths';
 import {reviewFile, reviewProject} from '../engine/reviewProject';
 import {reviewTextFile, reviewTextProject} from '../engine/textReviewProject';
 import type {ProjectSelection} from '../shared/reviewer-api';
 
 export function registerReviewerIpc(): void {
+  ipcMain.handle('reviewer:user-words:get', () => readUserWords());
+  ipcMain.handle('reviewer:user-words:set', (_event, words: unknown) => updateUserWords(words));
   ipcMain.handle('reviewer:select-project', async (): Promise<ProjectSelection | null> => {
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory'],
@@ -77,7 +80,7 @@ export function registerReviewerIpc(): void {
       throw new Error('Не выбрана папка документации.');
     }
 
-    return reviewTextProject(projectRoot, docsRoot);
+    return reviewTextProject(projectRoot, docsRoot, await readUserWords());
   });
 
   ipcMain.handle('reviewer:run-text-file', async (
@@ -96,7 +99,7 @@ export function registerReviewerIpc(): void {
       throw new Error('Не выбран файл документации.');
     }
 
-    return reviewTextFile(projectRoot, docsRoot, relativePath);
+    return reviewTextFile(projectRoot, docsRoot, relativePath, await readUserWords());
   });
 
 }
