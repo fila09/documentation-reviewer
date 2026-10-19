@@ -1,5 +1,11 @@
 import {contextBridge, ipcRenderer} from 'electron';
 
+ipcRenderer.on('reviewer:navigate', (_event, page: unknown) => {
+  if (page === 'review' || page === 'terms' || page === 'rules') {
+    window.dispatchEvent(new CustomEvent('docreview:navigate', {detail: page}));
+  }
+});
+
 contextBridge.exposeInMainWorld('reviewer', {
   selectProject: () => ipcRenderer.invoke('reviewer:select-project'),
   selectDocsRoot: (projectRoot: string): Promise<string | null> =>
