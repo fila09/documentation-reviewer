@@ -406,3 +406,18 @@ button:disabled {
 .reference-rule h3 { margin: 0 0 8px; }
 .reference-rule p { margin: 0; }
 @media (max-width: 720px) { .reference-columns { grid-template-columns: 1fr; } .reference-controls { flex-direction: column; } .reference-list { max-height: 220px; } }
+
+/* Compact project toolbar */
+.app-shell { padding: 12px 20px; }
+.project-header { gap: 14px; align-items: center; }
+.project-info { min-width: 0; }
+.path-row { grid-template-columns: 112px minmax(0, 1fr); margin-top: 3px; font-size: .88rem; }
+.header-actions { display: flex; width: auto; max-width: 60%; gap: 8px; align-items: center; }
+.secondary-actions, .review-actions { display: flex; gap: 8px; }
+.header-actions button { width: auto; white-space: nowrap; padding: 8px 10px; font-size: .88rem; min-height: 38px; }
+.summary, .filters { margin-top: 12px; }
+.filter-groups { margin-top: 12px; gap: 8px; }
+.file-filter { margin-top: 12px; }
+.workspace { margin-top: 12px; }
+@media (max-width: 1200px) { .project-header { flex-direction: column; align-items: stretch; } .header-actions { max-width: none; flex-wrap: wrap; } }
+@media (max-width: 980px) { .header-actions { width: 100%; } .secondary-actions, .review-actions { flex-wrap: wrap; } }
