@@ -1,7 +1,7 @@
 import {contextBridge, ipcRenderer} from 'electron';
 
 ipcRenderer.on('reviewer:navigate', (_event, page: unknown) => {
-  if (page === 'review' || page === 'terms' || page === 'rules') {
+  if (page === 'review' || page === 'terms' || page === 'rules' || page === 'dictionary') {
     window.dispatchEvent(new CustomEvent('docreview:navigate', {detail: page}));
   }
 });
