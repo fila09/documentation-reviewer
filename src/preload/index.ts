@@ -7,6 +7,8 @@ ipcRenderer.on('reviewer:navigate', (_event, page: unknown) => {
 });
 
 contextBridge.exposeInMainWorld('reviewer', {
+  getUserWords: (): Promise<string[]> => ipcRenderer.invoke('reviewer:user-words:get'),
+  setUserWords: (words: string[]): Promise<string[]> => ipcRenderer.invoke('reviewer:user-words:set', words),
   selectProject: () => ipcRenderer.invoke('reviewer:select-project'),
   selectDocsRoot: (projectRoot: string): Promise<string | null> =>
     ipcRenderer.invoke('reviewer:select-docs-root', projectRoot),
