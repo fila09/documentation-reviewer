@@ -93,9 +93,10 @@ function recommendationFor(_spell: SpellChecker, word: string): string {
   return `Проверьте написание слова «${word}».`;
 }
 
-export async function reviewRussianSpelling(documents: ParsedDocument[]): Promise<Finding[]> {
+export async function reviewRussianSpelling(documents: ParsedDocument[], userWords: readonly string[] = []): Promise<Finding[]> {
   const spell = await getSpellChecker();
   const findings: Finding[] = [];
+  const allowedWords = new Set(userWords.map((word) => word.toLocaleLowerCase('ru-RU')));
 
   for (const document of documents) {
     const sourceLines = document.file.content.split(/\r?\n/);
@@ -124,7 +125,7 @@ export async function reviewRussianSpelling(documents: ParsedDocument[]): Promis
           });
           continue;
         }
-        if (isCorrect(spell, word)) continue;
+        if (allowedWords.has(word.toLocaleLowerCase('ru-RU')) || isCorrect(spell, word)) continue;
         findings.push({
           ruleId: 'russian-spelling',
           category: 'text',
