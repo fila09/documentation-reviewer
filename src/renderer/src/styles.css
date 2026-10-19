@@ -429,3 +429,8 @@ button:disabled {
 .workspace { margin-top: 12px; }
 @media (max-width: 1200px) { .project-header { flex-direction: column; align-items: stretch; } .header-actions { max-width: none; flex-wrap: wrap; } }
 @media (max-width: 980px) { .header-actions { width: 100%; } .secondary-actions, .review-actions { flex-wrap: wrap; } }
+
+/* Personal dictionary */
+.user-dictionary-list { max-width: 680px; max-height: 55vh; overflow-y: auto; }
+.user-dictionary-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #eceff2; }
+.user-dictionary-row button { padding: 5px 12px; }
