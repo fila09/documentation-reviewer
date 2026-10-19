@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react';
+import type {FormEvent} from 'react';
 
 type DictionaryApi = {
   getUserWords(): Promise<string[]>;
@@ -30,7 +31,7 @@ export function UserDictionaryPage() {
     }
   }
 
-  function addWord(event: React.FormEvent<HTMLFormElement>) {
+  function addWord(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const word = input.trim().toLocaleLowerCase('ru-RU');
     if (!VALID_WORD.test(word) || word.length > 80) {
@@ -41,7 +42,8 @@ export function UserDictionaryPage() {
       setError('Это слово уже добавлено.');
       return;
     }
-    void save([...words, word]).then(() => setInput(''));
+    void save([...words, word]);
+    setInput('');
   }
 
   return <section className="reference-page" aria-label="Пользовательский словарь">
