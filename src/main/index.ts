@@ -1,4 +1,4 @@
-import {app, BrowserWindow, Menu} from 'electron';
+import {app, BrowserWindow, Menu, dialog, shell} from 'electron';
 import {join} from 'node:path';
 import {registerReviewerIpc} from './ipc';
 
@@ -32,6 +32,27 @@ function createWindow(): void {
     },
     {label: 'Вид', submenu: [{role: 'reload', label: 'Перезагрузить'}, {role: 'toggleDevTools', label: 'Инструменты разработчика'}, {role: 'resetZoom', label: 'Сбросить масштаб'}, {role: 'zoomIn', label: 'Увеличить масштаб'}, {role: 'zoomOut', label: 'Уменьшить масштаб'}]},
     {label: 'Окно', submenu: [{role: 'minimize', label: 'Свернуть'}, {role: 'close', label: 'Закрыть'}]},
+    {
+      label: 'Справка',
+      submenu: [
+        {
+          label: 'О программе',
+          click: () => {
+            void dialog.showMessageBox(window, {
+              type: 'info',
+              title: 'О программе ДокРевью',
+              message: 'ДокРевью',
+              detail: `Версия: ${app.getVersion()}\n\nЛокальная проверка Markdown/Diplodoc-документации: структура, ссылки, орфография и терминология.\n\nПроверяемые файлы не изменяются.\n\nАктуальные опубликованные релизы доступны в меню «Справка → История релизов».`,
+              buttons: ['Закрыть'],
+            });
+          },
+        },
+        {
+          label: 'История релизов',
+          click: () => { void shell.openExternal('https://github.com/fila09/documentation-reviewer/releases'); },
+        },
+      ],
+    },
   ]);
   Menu.setApplicationMenu(menu);
 
