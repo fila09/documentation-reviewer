@@ -7,14 +7,15 @@ import {FindingsList} from './components/FindingsList';
 import {Filters, type CategoryFilter, type FileFilter, type SeverityFilter} from './components/Filters';
 import {ProjectHeader} from './components/ProjectHeader';
 import {RulesPage, TerminologyPage} from './components/ReferencePages';
+import {UserDictionaryPage} from './components/UserDictionaryPage';
 import './styles.css';
 
 export function App() {
-  const [page, setPage] = useState<'review' | 'terms' | 'rules'>('review');
+  const [page, setPage] = useState<'review' | 'terms' | 'rules' | 'dictionary'>('review');
   useEffect(() => {
     const handleNavigation = (event: Event) => {
       const page = (event as CustomEvent<unknown>).detail;
-      if (page === 'review' || page === 'terms' || page === 'rules') setPage(page);
+      if (page === 'review' || page === 'terms' || page === 'rules' || page === 'dictionary') setPage(page);
     };
     window.addEventListener('docreview:navigate', handleNavigation);
     return () => window.removeEventListener('docreview:navigate', handleNavigation);
@@ -223,6 +224,7 @@ export function App() {
 
       {page === 'terms' && <TerminologyPage />}
       {page === 'rules' && <RulesPage />}
+      {page === 'dictionary' && <UserDictionaryPage />}
       {page === 'review' && <>
       {error && <div role="alert" className="error-banner">{error}</div>}
 
