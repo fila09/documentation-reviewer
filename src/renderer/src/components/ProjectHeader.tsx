@@ -22,8 +22,6 @@ export function ProjectHeader({
   return (
     <header className="project-header">
       <div className="project-info">
-        <h1>ДокРевью</h1>
-        <p className="app-subtitle">Проверка технической документации</p>
         <div className="path-row">
           <span className="path-label">Проект</span>
           <span className="project-path" title={projectRoot ?? undefined}>{projectRoot ?? 'Проект не выбран'}</span>
