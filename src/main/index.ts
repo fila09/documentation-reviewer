@@ -30,8 +30,8 @@ function createWindow(): void {
         {label: 'Правила проверки', click: () => navigate('rules')},
       ],
     },
-    {role: 'viewMenu'},
-    {role: 'windowMenu'},
+    {label: 'Вид', submenu: [{role: 'reload', label: 'Перезагрузить'}, {role: 'toggleDevTools', label: 'Инструменты разработчика'}, {role: 'resetZoom', label: 'Сбросить масштаб'}, {role: 'zoomIn', label: 'Увеличить масштаб'}, {role: 'zoomOut', label: 'Уменьшить масштаб'}]},
+    {label: 'Окно', submenu: [{role: 'minimize', label: 'Свернуть'}, {role: 'close', label: 'Закрыть'}]},
   ]);
   Menu.setApplicationMenu(menu);
 
