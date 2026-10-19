@@ -154,10 +154,10 @@ describe('App', () => {
     expect(screen.getByRole('button', {name: 'Информация 1'})).not.toBeDisabled();
   });
 
-  it('uses the russian product name and groups project actions in the header', () => {
+  it('groups project actions in the compact header', () => {
     render(<App />);
 
-    expect(screen.getByRole('heading', {name: 'ДокРевью'})).toBeInTheDocument();
+    expect(screen.getByRole('banner')).toBeInTheDocument();
     expect(screen.getByRole('button', {name: 'Выбрать проект'})).toBeInTheDocument();
     expect(screen.getByRole('button', {name: 'Выбрать папку'})).toBeDisabled();
     expect(screen.getByRole('button', {name: 'Проверить проект'})).toHaveClass('primary-action');
