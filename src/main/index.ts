@@ -2,7 +2,7 @@ import {app, BrowserWindow, Menu, dialog, shell} from 'electron';
 import {join} from 'node:path';
 import {registerReviewerIpc} from './ipc';
 
-type AppPage = 'review' | 'terms' | 'rules';
+type AppPage = 'review' | 'terms' | 'rules' | 'dictionary';
 
 function createWindow(): void {
   const window = new BrowserWindow({
@@ -27,6 +27,7 @@ function createWindow(): void {
       submenu: [
         {label: 'Проверка', click: () => navigate('review')},
         {label: 'Словарь терминов', click: () => navigate('terms')},
+        {label: 'Пользовательский словарь', click: () => navigate('dictionary')},
         {label: 'Правила проверки', click: () => navigate('rules')},
       ],
     },
