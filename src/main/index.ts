@@ -1,6 +1,8 @@
-import {app, BrowserWindow} from 'electron';
+import {app, BrowserWindow, Menu} from 'electron';
 import {join} from 'node:path';
 import {registerReviewerIpc} from './ipc';
+
+type AppPage = 'review' | 'terms' | 'rules';
 
 function createWindow(): void {
   const window = new BrowserWindow({
@@ -16,6 +18,22 @@ function createWindow(): void {
       sandbox: true,
     },
   });
+
+  const navigate = (page: AppPage) => window.webContents.send('reviewer:navigate', page);
+  const menu = Menu.buildFromTemplate([
+    ...(process.platform === 'darwin' ? [{role: 'appMenu' as const}] : []),
+    {
+      label: 'Разделы',
+      submenu: [
+        {label: 'Проверка', click: () => navigate('review')},
+        {label: 'Словарь терминов', click: () => navigate('terms')},
+        {label: 'Правила проверки', click: () => navigate('rules')},
+      ],
+    },
+    {role: 'viewMenu'},
+    {role: 'windowMenu'},
+  ]);
+  Menu.setApplicationMenu(menu);
 
   if (process.env.ELECTRON_RENDERER_URL) {
     void window.loadURL(process.env.ELECTRON_RENDERER_URL);
