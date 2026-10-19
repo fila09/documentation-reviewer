@@ -11,6 +11,15 @@ import './styles.css';
 
 export function App() {
   const [page, setPage] = useState<'review' | 'terms' | 'rules'>('review');
+  useEffect(() => {
+    const handleNavigation = (event: Event) => {
+      const page = (event as CustomEvent<unknown>).detail;
+      if (page === 'review' || page === 'terms' || page === 'rules') setPage(page);
+    };
+    window.addEventListener('docreview:navigate', handleNavigation);
+    return () => window.removeEventListener('docreview:navigate', handleNavigation);
+  }, []);
+
   const [projectRoot, setProjectRoot] = useState<string | null>(null);
   const [docsRoot, setDocsRoot] = useState<string | null>(null);
   const [result, setResult] = useState<ReviewResult | null>(null);
@@ -212,11 +221,6 @@ export function App() {
         reviewingText={reviewingText}
       />
 
-      <nav className="app-tabs" aria-label="Разделы приложения">
-        <button type="button" className={page === 'review' ? 'active' : ''} aria-current={page === 'review' ? 'page' : undefined} onClick={() => setPage('review')}>Проверка</button>
-        <button type="button" className={page === 'terms' ? 'active' : ''} aria-current={page === 'terms' ? 'page' : undefined} onClick={() => setPage('terms')}>Словарь терминов</button>
-        <button type="button" className={page === 'rules' ? 'active' : ''} aria-current={page === 'rules' ? 'page' : undefined} onClick={() => setPage('rules')}>Правила проверки</button>
-      </nav>
       {page === 'terms' && <TerminologyPage />}
       {page === 'rules' && <RulesPage />}
       {page === 'review' && <>
