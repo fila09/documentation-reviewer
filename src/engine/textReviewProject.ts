@@ -21,11 +21,11 @@ async function yieldToEventLoop(): Promise<void> {
   await new Promise<void>((resolve) => setImmediate(resolve));
 }
 
-async function reviewDocumentsWithYield(documents: ReturnType<typeof parseMarkdown>[]): Promise<Finding[]> {
+async function reviewDocumentsWithYield(documents: ReturnType<typeof parseMarkdown>[], userWords: readonly string[]): Promise<Finding[]> {
   const findings: Finding[] = [];
 
   for (const document of documents) {
-    findings.push(...await reviewRussianSpelling([document]));
+    findings.push(...await reviewRussianSpelling([document], userWords));
     await yieldToEventLoop();
   }
 
@@ -56,7 +56,7 @@ async function readSelectedMarkdownFile(docsRoot: string, relativePath: string):
   };
 }
 
-export async function reviewTextProject(projectRoot: string, docsRoot: string): Promise<ReviewResult> {
+export async function reviewTextProject(projectRoot: string, docsRoot: string, userWords: readonly string[] = []): Promise<ReviewResult> {
   const resolved = await resolveProjectPaths(projectRoot, docsRoot);
   const scanResult = await scanMarkdownFiles(resolved.docsRoot);
   const documents = scanResult.files.map(parseMarkdown);
@@ -67,7 +67,7 @@ export async function reviewTextProject(projectRoot: string, docsRoot: string): 
 
   let findings: Finding[] = [];
   try {
-    findings = await reviewDocumentsWithYield(documents);
+    findings = await reviewDocumentsWithYield(documents, userWords);
   } catch (error) {
     diagnostics.push({
       source: 'rule',
@@ -90,6 +90,7 @@ export async function reviewTextFile(
   projectRoot: string,
   docsRoot: string,
   relativePath: string,
+  userWords: readonly string[] = [],
 ): Promise<FileReviewResult> {
   const resolved = await resolveProjectPaths(projectRoot, docsRoot);
   const file = await readSelectedMarkdownFile(resolved.docsRoot, relativePath);
@@ -97,7 +98,7 @@ export async function reviewTextFile(
   let findings: Finding[] = [];
 
   try {
-    findings = await reviewRussianSpelling([parseMarkdown(file)]);
+    findings = await reviewRussianSpelling([parseMarkdown(file)], userWords);
   } catch (error) {
     diagnostics.push({
       source: 'rule',
